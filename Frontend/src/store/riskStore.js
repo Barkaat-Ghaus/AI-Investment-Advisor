@@ -1,6 +1,7 @@
 import { create } from 'zustand';
+import API_BASE_URL from '../config/api';
 
-const API_URL = 'http://localhost:3001/api/finance';
+const API_URL = `${API_BASE_URL}/api/finance`;
 
 const useRiskStore = create((set, get) => ({
   risks: {

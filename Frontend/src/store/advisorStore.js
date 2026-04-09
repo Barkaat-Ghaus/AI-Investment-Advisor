@@ -1,4 +1,5 @@
-import { create } from "zustand"; 
+import { create } from "zustand";
+import API_BASE_URL from '../config/api'; 
 
 const DEFAULT_VALUES = {
   income:     60000,
@@ -25,7 +26,7 @@ const useAdvisorStore = create((set, get) => ({
       const { values } = get();
       const message = `Generate exactly 5  bullet points consist of minimum 20 words and maximum 60 words (separated by '|') of direct investment advice for an investor with ₹${values.income} monthly income, investing ₹${values.investment}, duration ${values.duration} years, ${values.risk} risk tolerance. Do not include introductory text, markdown, or numbers. Just the 5 points separated by '|'.`;
       
-      const res = await fetch("http://localhost:3001/api/chat", {
+      const res = await fetch(`${API_BASE_URL}/api/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message })

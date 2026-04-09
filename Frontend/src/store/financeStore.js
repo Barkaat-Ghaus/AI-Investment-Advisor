@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import API_BASE_URL from '../config/api';
 
 const calculateTimeToGoal = (pv, p, fv, annualRate) => {
   const r = (parseFloat(annualRate) / 100) / 12;
@@ -23,7 +24,7 @@ const useFinanceStore = create((set, get) => ({
   fetchTopStocks: async () => {
     set({ isLoading: true });
     try {
-      const res = await fetch("http://localhost:3001/api/finance/top-performers");
+      const res = await fetch(`${API_BASE_URL}/api/finance/top-performers`);
       const data = await res.json();
       set({ 
         topStocksUs: data.us || [], 
@@ -60,7 +61,7 @@ const useFinanceStore = create((set, get) => ({
     try {
       const prompt = `Act as an elite financial advisor. A user wants to achieve the goal "${answers.goalName}" with a target of ₹${answers.targetAmount}. They have ₹${answers.initialCapital} saved and can contribute ₹${answers.monthlySave} monthly. Their desired time is ${answers.desiredYears} years. Their risk profile is ${answers.riskProfile} and investing in ${answers.investmentRegion}. Generate 5 strategic bullet points (separated by '|') for achieving this goal. Keep it minimum 30 words and under 100 words total. No intro.`;
       
-      const res = await fetch("http://localhost:3001/api/chat", {
+      const res = await fetch(`${API_BASE_URL}/api/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: prompt })
