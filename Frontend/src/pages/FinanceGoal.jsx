@@ -121,7 +121,7 @@ export default function FinanceGoal() {
       
       {/* ── Greeting ────────────────────────────────────────────── */}
       {step === 0 && (
-        <div className="anim-fade-up text-center space-y-8 max-w-2xl">
+        <div className=" text-center space-y-8 max-w-2xl">
           <div className="inline-flex p-4 bg-indigo-100 rounded-3xl mb-4 group hover:scale-110 transition-transform cursor-pointer">
             <Sparkles className="w-10 h-10 text-indigo-600 animate-pulse" />
           </div>
@@ -133,7 +133,7 @@ export default function FinanceGoal() {
           </p>
           <button 
             onClick={handleNext}
-            className="group flex items-center gap-3 bg-[#0d1f3d] text-white px-10 py-5 rounded-2xl font-bold text-lg hover:bg-indigo-600 transition-all shadow-xl hover:shadow-indigo-200"
+            className=" flex text-center items-center gap-3 bg-[#0d1f3d] text-white px-10 py-5 rounded-2xl font-bold text-lg hover:bg-indigo-600 transition-all shadow-xl hover:shadow-indigo-200"
           >
             Start Goal Assessment
             <ChevronRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />

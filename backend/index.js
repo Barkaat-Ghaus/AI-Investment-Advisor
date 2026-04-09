@@ -18,7 +18,7 @@ app.use(cors());
 app.use(express.json());
 app.use(bodyParser.json());
 
-const PORT = process.env.PORT; 
+const PORT = process.env.PORT || 3001; 
 // Connect MongoDB
 connectDB();
 
