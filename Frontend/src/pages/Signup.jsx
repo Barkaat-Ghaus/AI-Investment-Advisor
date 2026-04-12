@@ -31,7 +31,7 @@ const Signup = () => {
     clearError();
     const result = await signup(data);
     if (result.success) {
-      navigate('/login');
+      navigate('/');
     }
   };
 

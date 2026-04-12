@@ -7,20 +7,38 @@ import authRoutes from "./routes/authRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
 
 import financeRoutes from "./routes/financeRoutes.js";
+import financialProfileRoutes from "./routes/financialProfileRoutes.js";
+import advisoryRoutes from "./routes/advisoryRoutes.js";
 
 dotenv.config();
 
 const app = express();
 
+// CORS Configuration
+const allowedOrigins = [
+  'https://ai-investing-advisor.netlify.app',
+  'http://localhost:3001',
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:5174'
+];
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
 // Middleware
-
-
-app.use(cors({
-  // Replace with your actual Netlify URL
-  origin: 'https://ai-investing-advisor.netlify.app/', 
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true
-}));
+app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use(bodyParser.json());
@@ -32,6 +50,8 @@ connectDB();
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/finance", financeRoutes);
+app.use("/api/profile", financialProfileRoutes);
+app.use("/api/advisory", advisoryRoutes);
 
 app.use("/api/chat", chatRoutes);
 

@@ -9,6 +9,7 @@ const TABS = [
   { label: 'Goals',        path: '/goals'      },
   { label: 'Risk Analysis',path: '/risk-analysis' },
   { label: 'Market Data',  path: '/markets'    },
+  { label: 'Profile',      path: '/profile'    },
 ];
 
 export default function TopBar() {
@@ -64,9 +65,11 @@ export default function TopBar() {
             </button>
 
             {/* Avatar */}
-            <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-[13px] font-bold cursor-pointer select-none bg-gradient-to-br from-[#2a6a3f] to-[#3d9e5f]">
-              {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
-            </div>
+            <Link to="/profile" className="no-underline">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-[13px] font-bold cursor-pointer select-none bg-gradient-to-br from-[#2a6a3f] to-[#3d9e5f] hover:opacity-90 transition-opacity">
+                {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+              </div>
+            </Link>
 
             <button
               onClick={handleLogout}

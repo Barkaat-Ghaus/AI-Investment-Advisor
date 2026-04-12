@@ -1,6 +1,8 @@
 import React from 'react';
 import useAdvisorStore from '../store/advisorStore' ;
 import InvestmentForm from '../components/InvestmentForm';
+import ProfileSelector from '../components/ProfileSelector';
+import SaveAdvisoryButton from '../components/SaveAdvisoryButton';
 import useFinancialRiskDataStore from '../store/financialRiskDataStore'; 
 import {  
   TrendingUp, 
@@ -45,7 +47,7 @@ function CheckRow({ bold, rest }) {
 }
 
 /* ── Portfolio Report Component ────────────────────────────────── */
-function PortfolioReport({ values, calculated, regionalData }) {
+function PortfolioReport({ values, calculated, regionalData, profileId }) {
   if (!calculated) return null;
 
   const { investment, duration, risk } = values;
@@ -168,7 +170,8 @@ function PortfolioReport({ values, calculated, regionalData }) {
             </div>
           </div>
 
-          <div className="mt-8 pt-6 border-t border-white/10">
+          <div className="mt-8 pt-6 border-t border-white/10 space-y-3">
+             <SaveAdvisoryButton profileId={profileId} disabled={!calculated} />
              <button className="w-full py-3 bg-white text-slate-900 rounded-xl text-sm font-bold flex items-center justify-center gap-2 hover:bg-slate-100 transition-colors">
                Download PDF Report
                <ArrowRight className="w-4 h-4" />
@@ -214,6 +217,7 @@ function PortfolioReport({ values, calculated, regionalData }) {
 export default function AdvisorPage() {
   const { values, calculated, aiInsights, loadingInsights, setValues, handleCalculate } = useAdvisorStore();
   const { region, getRiskData } = useFinancialRiskDataStore();
+  const [profileId, setProfileId] = React.useState(null);
   const regionalData = getRiskData(region);
 
   const handleChange = (field, val) => {
@@ -240,6 +244,13 @@ export default function AdvisorPage() {
 
           {/* Right stacked cards */}
           <div className="flex flex-col gap-3.5">
+            <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+              <ProfileSelector 
+                onProfileSelect={setProfileId}
+                disabled={!calculated}
+              />
+            </div>
+
             {(calculated || loadingInsights) && (
               <DarkCard
                 title="AI Advisor Insights"
@@ -268,7 +279,7 @@ export default function AdvisorPage() {
           </div>
         </div>
 
-        <PortfolioReport values={values} calculated={calculated} regionalData={regionalData} />
+        <PortfolioReport values={values} calculated={calculated} regionalData={regionalData} profileId={profileId} />
 
 
       </main>

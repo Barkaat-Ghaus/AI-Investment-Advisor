@@ -11,6 +11,8 @@ import YourHome from "./pages/YourHome.jsx";
 import MarketData from "./pages/MarketData.jsx";
 import RiskAnalysis from "./pages/RiskAnalysis.jsx";
 import FinanceGoal from "./pages/FinanceGoal.jsx";
+import ProfileQuestion from "./pages/ProfileQuestion.jsx";
+import Profile from "./pages/Profile.jsx";
 
 
 createRoot(document.getElementById("root")).render(
@@ -29,6 +31,8 @@ createRoot(document.getElementById("root")).render(
           <Route path="markets" element={<MarketData />} />
           <Route path="risk-analysis" element={<RiskAnalysis />} />
           <Route path="goals" element={<FinanceGoal />} />
+          <Route path="profile-setup" element={<ProfileQuestion />} />
+          <Route path="profile" element={<Profile />} />
 
         </Route>
       </Routes>

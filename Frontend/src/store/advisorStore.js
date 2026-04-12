@@ -14,6 +14,9 @@ const useAdvisorStore = create((set, get) => ({
   calculated: false,
   aiInsights: [],
   loadingInsights: false,
+  savingAdvisory: false,
+  saveError: null,
+  saveSuccess: null,
 
   setValues: (field, val) => set((state) => ({
     values: { ...state.values, [field]: val },
@@ -49,7 +52,73 @@ const useAdvisorStore = create((set, get) => ({
     } finally {
       set({ loadingInsights: false });
     }
-  }
+  },
+
+  saveAdvisory: async (userId, profileId, allocationData) => {
+    set({ savingAdvisory: true, saveError: null, saveSuccess: null });
+    try {
+      const { values, aiInsights } = get();
+      
+      // Get allocation percentages based on risk
+      const getAllocation = (riskLevel) => {
+        switch (riskLevel) {
+          case 'low':
+            return { stocks: 10, bonds: 40, gold: 15, mutualFunds: 20, cash: 15 };
+          case 'medium':
+            return { stocks: 30, bonds: 20, gold: 10, mutualFunds: 30, cash: 10 };
+          case 'high':
+            return { stocks: 50, bonds: 5, gold: 10, mutualFunds: 30, cash: 5 };
+          default:
+            return { stocks: 30, bonds: 20, gold: 10, mutualFunds: 30, cash: 10 };
+        }
+      };
+
+      const allocation = getAllocation(values.risk);
+
+      const advisoryData = {
+        user_id: userId,
+        profile_id: profileId,
+        equity_allocation: allocation.stocks,
+        bond_allocation: allocation.bonds,
+        gold_allocation: allocation.gold,
+        mutual_fund_allocation: allocation.mutualFunds,
+        cash_allocation: allocation.cash,
+        advisory_text: aiInsights.join(' | ') || 'Investment advisory based on profile analysis',
+        current_price: values.investment,
+        market_source: 'AI Investment Advisor',
+      };
+
+      const res = await fetch(`${API_BASE_URL}/api/advisory`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(advisoryData),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        set({ 
+          saveSuccess: 'Advisory saved successfully!',
+          savingAdvisory: false 
+        });
+        return { success: true, message: 'Advisory saved successfully', advisory: data.advisory };
+      } else {
+        set({ 
+          saveError: data.message || 'Failed to save advisory',
+          savingAdvisory: false 
+        });
+        return { success: false, message: data.message };
+      }
+    } catch (error) {
+      set({ 
+        saveError: error.message,
+        savingAdvisory: false 
+      });
+      return { success: false, message: error.message };
+    }
+  },
+
+  clearSaveMessages: () => set({ saveError: null, saveSuccess: null })
 }));
 
 export default useAdvisorStore;
