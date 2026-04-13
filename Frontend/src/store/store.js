@@ -201,6 +201,7 @@ const useAuthStore = create(
         const token = getStoredToken();
         if (!token) {
           isVerifying = false;
+          console.error("No token provided");
           set({ user: null, token: null, isAuthenticated: false });
           return false;
         }
@@ -218,10 +219,21 @@ const useAuthStore = create(
             });
             return true;
           } else {
-            // Token invalid or expired — clear everything
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            set({ user: null, token: null, isAuthenticated: false });
+            // Token invalid or expired
+            console.error(`Token verification failed with status: ${response.status}`);
+            try {
+              const errData = await response.json();
+              console.error("Error details:", errData);
+            } catch (e) {}
+
+            // Prevent race condition: if user logged in with a NEW token while this request
+            // was inflight, do NOT wipe the new token!
+            const currentToken = getStoredToken();
+            if (currentToken === token) {
+              localStorage.removeItem('token');
+              localStorage.removeItem('user');
+              set({ user: null, token: null, isAuthenticated: false });
+            }
             return false;
           }
         } catch {
