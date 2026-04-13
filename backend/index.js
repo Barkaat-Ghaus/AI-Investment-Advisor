@@ -9,6 +9,7 @@ import chatRoutes from "./routes/chatRoutes.js";
 import financeRoutes from "./routes/financeRoutes.js";
 import financialProfileRoutes from "./routes/financialProfileRoutes.js";
 import advisoryRoutes from "./routes/advisoryRoutes.js";
+import { errorHandler } from "./middlewares/errorMiddleware.js";
 
 dotenv.config();
 
@@ -54,6 +55,14 @@ app.use("/api/profile", financialProfileRoutes);
 app.use("/api/advisory", advisoryRoutes);
 
 app.use("/api/chat", chatRoutes);
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ message: "Route not found" });
+});
+
+// Error handler (MUST be last)
+app.use(errorHandler);
 
 // app.get("/", (req, res) => {
 //  res.send("API is running...");

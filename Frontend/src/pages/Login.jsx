@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import useAuthStore from '../store/store';
@@ -6,13 +6,14 @@ import AuthNav from '../components/AuthNav';
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login, isLoading, error, clearError, isAuthenticated } = useAuthStore();
+  const { login, isLoading, error, clearError, verifyToken } = useAuthStore();
 
+  // On mount, check if already logged in with a valid token — if so skip login
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/');
-    }
-  }, [isAuthenticated, navigate]);
+    verifyToken().then((valid) => {
+      if (valid) navigate('/', { replace: true });
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const {
     register,
     handleSubmit,

@@ -30,7 +30,9 @@ const useRiskStore = create((set, get) => ({
       });
     } catch (error) {
       set({ error: error.message, isLoading: false });
-      console.error('Risk metrics fetch error:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Risk metrics fetch error:', error);
+      }
     }
   },
 
@@ -51,7 +53,9 @@ const useRiskStore = create((set, get) => ({
       }));
       return data;
     } catch (error) {
-      console.error(`Asset risk fetch error for ${assetType}:`, error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error(`Asset risk fetch error for ${assetType}:`, error);
+      }
       throw error;
     }
   }

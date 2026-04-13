@@ -32,7 +32,9 @@ const useFinanceStore = create((set, get) => ({
         isLoading: false 
       });
     } catch (err) {
-      console.error("Fetch stocks error:", err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error("Fetch stocks error:", err);
+      }
       set({ isLoading: false });
     }
   },

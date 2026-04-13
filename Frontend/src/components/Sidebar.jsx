@@ -44,7 +44,7 @@ export default function Sidebar() {
       {/* Logo */}
       <div className="px-5 pt-6 pb-7">
         <div className="flex items-center gap-2.5">
-          <div className="w-[34px] h-[34px] rounded-[9px] flex items-center justify-center shrink-0 bg-gradient-to-br from-[#2a6a3f] to-[#3d9e5f]">
+          <div className="w-8.5 h-8.5 rounded-lg flex items-center justify-center shrink-0 bg-gradient-to-br from-[#2a6a3f] to-[#3d9e5f]">
             <svg width="16" height="16" fill="none" stroke="white" strokeWidth="2.2" viewBox="0 0 24 24">
               <path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/>
             </svg>
@@ -79,7 +79,7 @@ export default function Sidebar() {
 
       {/* Bottom */}
       <div className="px-3 pb-6">
-        <div className="h-px bg-white/[0.08] my-2" />
+        <div className="h-px bg-white/8 my-2" />
         {BOTTOM_ITEMS.map((item) => (
           <div
             key={item.label}

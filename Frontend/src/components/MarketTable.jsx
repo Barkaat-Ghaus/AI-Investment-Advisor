@@ -1,4 +1,4 @@
-import React, { useState } from ' react ';
+import React, { useState } from 'react';
 
 const STOCKS = [
   { symbol: 'NVDA', name: 'NVIDIA Corporation',  price: '$726.13', change: '+4.28%', positive: true  },

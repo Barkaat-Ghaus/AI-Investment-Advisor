@@ -16,7 +16,7 @@ import {
 function HubCard({ title, desc, icon: Icon, path, color }) {
   return (
     <Link to={path} className="group no-underline block">
-      <div className="w-full bg-white rounded-[2rem] border border-slate-100 p-6 md:p-8 shadow-sm hover:shadow-xl transition-all duration-300 hover:border-indigo-100 flex flex-col md:flex-row items-center md:items-center gap-6 lg:gap-10">
+      <div className="w-full bg-white rounded-4xl border border-slate-100 p-6 md:p-8 shadow-sm hover:shadow-xl transition-all duration-300 hover:border-indigo-100 flex flex-col md:flex-row items-center md:items-center gap-6 lg:gap-10">
         <div className={`w-20 h-20 shrink-0 rounded-3xl ${color} flex items-center justify-center group-hover:scale-110 transition-transform`}>
           <Icon className="w-10 h-10" />
         </div>
@@ -77,7 +77,7 @@ export default function YourHome() {
             Welcome Back to Global Wealth
           </div>
           <h1 className="text-5xl md:text-6xl font-extrabold text-[#0d1f3d] tracking-tighter">
-            Hello, <span className="text-indigo-600">{user?.name || 'User'}!</span>
+            Hello, <span className="text-indigo-600">{user?.name}</span>
           </h1>
           <p className="text-xl text-slate-500 max-w-2xl leading-relaxed">
             Your centralized financial command center. Select a module below to begin your wealth management journey.

@@ -16,12 +16,15 @@ const useProfileStore = create((set, get) => ({
       });
       if (res.ok) {
         const data = await res.json();
-        set({ profile: data });
+        set({ profile: data, error: null });
+      } else if (res.status === 404) {
+        set({ profile: null, error: null });
       } else {
-        set({ profile: null });
+        const errorData = await res.json();
+        set({ profile: null, error: errorData.message });
       }
     } catch (err) {
-      set({ error: err.message });
+      set({ error: err.message, profile: null });
     } finally {
       set({ loading: false });
     }
@@ -40,7 +43,8 @@ const useProfileStore = create((set, get) => ({
       });
       const data = await res.json();
       if (res.ok) {
-        set({ profile: data.profile });
+        const profileData = data.profile || data;
+        set({ profile: profileData, error: null });
         return { success: true, message: data.message };
       } else {
         set({ error: data.message });

@@ -1,7 +1,8 @@
 import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import useAdvisorStore from '../store/advisorStore' ;
+import useAuthStore from '../store/store';
 import InvestmentForm from '../components/InvestmentForm';
-import ProfileSelector from '../components/ProfileSelector';
 import SaveAdvisoryButton from '../components/SaveAdvisoryButton';
 import useFinancialRiskDataStore from '../store/financialRiskDataStore'; 
 import {  
@@ -12,7 +13,8 @@ import {
   Info,
   Calendar,
   Wallet,
-  BadgeAlert
+  BadgeAlert,
+  History
 } from 'lucide-react' ;
 
 
@@ -33,7 +35,7 @@ function DarkCard({ title, action, children }) {
 function CheckRow({ bold, rest }) {
   return (
     <div className="flex items-start gap-2.5">
-      <span className="shrink-0 mt-[1px]">
+      <span className="shrink-0 mt-px">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3d9e5f" strokeWidth="2.8">
           <polyline points="20 6 9 17 4 12"/>
         </svg>
@@ -47,7 +49,7 @@ function CheckRow({ bold, rest }) {
 }
 
 /* ── Portfolio Report Component ────────────────────────────────── */
-function PortfolioReport({ values, calculated, regionalData, profileId }) {
+function PortfolioReport({ values, calculated, regionalData }) {
   if (!calculated) return null;
 
   const { investment, duration, risk } = values;
@@ -171,7 +173,7 @@ function PortfolioReport({ values, calculated, regionalData, profileId }) {
           </div>
 
           <div className="mt-8 pt-6 border-t border-white/10 space-y-3">
-             <SaveAdvisoryButton profileId={profileId} disabled={!calculated} />
+          <SaveAdvisoryButton disabled={!calculated} />
              <button className="w-full py-3 bg-white text-slate-900 rounded-xl text-sm font-bold flex items-center justify-center gap-2 hover:bg-slate-100 transition-colors">
                Download PDF Report
                <ArrowRight className="w-4 h-4" />
@@ -215,41 +217,53 @@ function PortfolioReport({ values, calculated, regionalData, profileId }) {
 }
 
 export default function AdvisorPage() {
+  const navigate = useNavigate();
+  const { isAuthenticated, token } = useAuthStore();
   const { values, calculated, aiInsights, loadingInsights, setValues, handleCalculate } = useAdvisorStore();
   const { region, getRiskData } = useFinancialRiskDataStore();
-  const [profileId, setProfileId] = React.useState(null);
   const regionalData = getRiskData(region);
+
+  React.useEffect(() => {
+    if (!isAuthenticated || !token) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, token, navigate]);
 
   const handleChange = (field, val) => {
     setValues(field, val);
   };
 
+  const handleCalculateWithToken = () => handleCalculate(token);
+
   return (
     <>
-      <main className="flex-1 px-10 pt-9 pb-16 max-w-[1280px]">
+      <main className="flex-1 px-10 pt-9 pb-16 max-w-7xl">
 
         {/* Page header */}
-        <div className="anim-fade-up mb-7">
-          <p className="text-[10.5px] font-bold text-[#2a6a3f] tracking-[0.14em] mb-2 uppercase">
-            Investment Profile Input
-          </p>
-          <h1 className="text-[clamp(24px,3vw,36px)] font-extrabold text-[#0d1f3d] leading-tight tracking-tight">
-            Define your financial Profile.
-          </h1>
+        <div className="anim-fade-up mb-7 flex items-center justify-between">
+          <div>
+            <p className="text-[10.5px] font-bold text-[#2a6a3f] tracking-[0.14em] mb-2 uppercase">
+              Investment Profile Input
+            </p>
+            <h1 className="text-[clamp(24px,3vw,36px)] font-extrabold text-[#0d1f3d] leading-tight tracking-tight">
+              Define your financial Profile.
+            </h1>
+          </div>
+          <Link
+            to="/advisory-history"
+            className="flex items-center gap-2 px-5 py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-colors no-underline whitespace-nowrap"
+          >
+            <History className="w-4 h-4" />
+            View History
+          </Link>
         </div>
 
         {/* Two-column layout */}
         <div className="anim-fade-up delay-1 grid gap-5 items-start" style={{ gridTemplateColumns: '1fr 268px' }}>
-          <InvestmentForm values={values} onChange={handleChange} onCalculate={handleCalculate} />
+          <InvestmentForm values={values} onChange={handleChange} onCalculate={handleCalculateWithToken} />
 
           {/* Right stacked cards */}
           <div className="flex flex-col gap-3.5">
-            <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
-              <ProfileSelector 
-                onProfileSelect={setProfileId}
-                disabled={!calculated}
-              />
-            </div>
 
             {(calculated || loadingInsights) && (
               <DarkCard
@@ -279,7 +293,7 @@ export default function AdvisorPage() {
           </div>
         </div>
 
-        <PortfolioReport values={values} calculated={calculated} regionalData={regionalData} profileId={profileId} />
+        <PortfolioReport values={values} calculated={calculated} regionalData={regionalData} />
 
 
       </main>

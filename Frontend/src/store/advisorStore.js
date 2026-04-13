@@ -23,26 +23,29 @@ const useAdvisorStore = create((set, get) => ({
     calculated: false
   })),
 
-  handleCalculate: async () => {
+  handleCalculate: async (token) => {
     set({ calculated: true, loadingInsights: true });
     try {
       const { values } = get();
-      const message = `Generate exactly 5  bullet points consist of minimum 20 words and maximum 60 words (separated by '|') of direct investment advice for an investor with ₹${values.income} monthly income, investing ₹${values.investment}, duration ${values.duration} years, ${values.risk} risk tolerance. Do not include introductory text, markdown, or numbers. Just the 5 points separated by '|'.`;
-      
+      const message = `Generate exactly 5 bullet points (separated by '|') of direct investment advice, each between 20 and 60 words, for an investor with ₹${values.income} monthly income, investing ₹${values.investment}, duration ${values.duration} years, ${values.risk} risk tolerance. Do not include introductory text, markdown, or numbers. Just the 5 points separated by '|'.`;
+
+      const headers = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
       const res = await fetch(`${API_BASE_URL}/api/chat`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ message })
       });
-      
+
       const data = await res.json();
-      
+
       if (data.answer) {
-        if (!data.success) {
-          set({ aiInsights: [data.answer] });
-        } else {
+        if (data.success) {
           const pts = data.answer.replace(/\n|•|-|\*/g, '').split('|').map(p => p.trim()).filter(p => p);
           set({ aiInsights: pts.length > 0 ? pts : [data.answer] });
+        } else {
+          set({ aiInsights: [data.answer] });
         }
       } else {
         set({ aiInsights: ["No insights returned."] });
@@ -54,10 +57,36 @@ const useAdvisorStore = create((set, get) => ({
     }
   },
 
-  saveAdvisory: async (userId, profileId, allocationData) => {
+  saveAdvisory: async (userId, profileId, token) => {
+    // Validate required parameters
+    if (!userId || !profileId || !token) {
+      set({ 
+        saveError: 'Missing required user information',
+        savingAdvisory: false 
+      });
+      return { success: false, message: 'Missing required parameters' };
+    }
+
     set({ savingAdvisory: true, saveError: null, saveSuccess: null });
     try {
       const { values, aiInsights } = get();
+      
+      // Validate advisory data exists
+      if (!values?.investment) {
+        set({ 
+          saveError: 'Please complete your investment details',
+          savingAdvisory: false 
+        });
+        return { success: false, message: 'Incomplete investment data' };
+      }
+
+      if (!aiInsights || aiInsights.length === 0) {
+        set({ 
+          saveError: 'No advisory insights available',
+          savingAdvisory: false 
+        });
+        return { success: false, message: 'No advisory insights' };
+      }
       
       // Get allocation percentages based on risk
       const getAllocation = (riskLevel) => {
@@ -90,7 +119,10 @@ const useAdvisorStore = create((set, get) => ({
 
       const res = await fetch(`${API_BASE_URL}/api/advisory`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(advisoryData),
       });
 

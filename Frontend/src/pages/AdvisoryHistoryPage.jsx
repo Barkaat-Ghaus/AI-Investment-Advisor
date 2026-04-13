@@ -1,11 +1,21 @@
 import React from 'react';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { History, TrendingUp } from 'lucide-react';
+import useAuthStore from '../store/store';
 import AdvisoryHistory from '../components/AdvisoryHistory';
 
 export default function AdvisoryHistoryPage() {
+  const navigate = useNavigate();
+  const { isAuthenticated, token } = useAuthStore();
+
+  // Redirect immediately on render — no flash of protected content
+  if (!isAuthenticated || !token) {
+    return <Navigate to="/login" replace />;
+  }
+
   return (
     <>
-      <main className="flex-1 px-10 pt-9 pb-16 max-w-[1280px]">
+      <main className="flex-1 px-10 pt-9 pb-16 max-w-7xl">
         {/* Page header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
