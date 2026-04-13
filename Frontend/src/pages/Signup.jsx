@@ -11,7 +11,7 @@ const Signup = () => {
   // On mount, check if already logged in with a valid token — if so skip signup
   useEffect(() => {
     verifyToken().then((valid) => {
-      if (valid) navigate('/', { replace: true });
+      if (valid) navigate('/home', { replace: true });
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const {
@@ -32,7 +32,7 @@ const Signup = () => {
     clearError();
     const result = await signup(data);
     if (result?.success) {
-      navigate('/', { replace: true });
+      navigate('/home', { replace: true });
     }
   };
 

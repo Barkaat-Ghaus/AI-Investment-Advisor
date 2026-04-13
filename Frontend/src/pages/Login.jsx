@@ -11,7 +11,7 @@ const Login = () => {
   // On mount, check if already logged in with a valid token — if so skip login
   useEffect(() => {
     verifyToken().then((valid) => {
-      if (valid) navigate('/', { replace: true });
+      if (valid) navigate('/home', { replace: true });
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const {
@@ -20,9 +20,9 @@ const Login = () => {
     formState: { errors },
   } = useForm({
     defaultValues: {
-      email: '',
-      password: '',
-      rememberMe: false,
+      email: localStorage.getItem('rememberedEmail') || '',
+      password: localStorage.getItem('rememberedPassword') || '',
+      rememberMe: !!localStorage.getItem('rememberedEmail'),
     }
   });
 
@@ -30,7 +30,14 @@ const Login = () => {
     clearError();
     const result = await login({ email: data.email, password: data.password });
     if (result.success) {
-      navigate('/');
+      if (data.rememberMe) {
+        localStorage.setItem('rememberedEmail', data.email);
+        localStorage.setItem('rememberedPassword', data.password);
+      } else {
+        localStorage.removeItem('rememberedEmail');
+        localStorage.removeItem('rememberedPassword');
+      }
+      navigate('/home');
     }
   };
 
