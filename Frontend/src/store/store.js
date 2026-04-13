@@ -4,6 +4,9 @@ import API_BASE_URL from '../config/api';
 
 const API_URL = `${API_BASE_URL}/api/auth`;
 
+// Module-level lock — prevents concurrent verifyToken calls (StrictMode, Zustand persist, etc.)
+let isVerifying = false;
+
 // Safe localStorage getter for SSR compatibility
 
 const getStoredToken = () => {
@@ -191,8 +194,13 @@ const useAuthStore = create(
       
       // Called on app load — hits the backend to confirm the token is still valid
       verifyToken: async () => {
+        // Prevent concurrent calls (StrictMode double-invoke, persist re-subscriptions, etc.)
+        if (isVerifying) return !!getStoredToken();
+        isVerifying = true;
+
         const token = getStoredToken();
         if (!token) {
+          isVerifying = false;
           set({ user: null, token: null, isAuthenticated: false });
           return false;
         }
@@ -203,7 +211,11 @@ const useAuthStore = create(
           });
           if (response.ok) {
             const data = await response.json();
-            set({ user: data.user, token, isAuthenticated: true });
+            // Only update state if something actually changed
+            set((prev) => {
+              if (prev.isAuthenticated && prev.token === token) return prev;
+              return { user: data.user, token, isAuthenticated: true };
+            });
             return true;
           } else {
             // Token invalid or expired — clear everything
@@ -215,6 +227,8 @@ const useAuthStore = create(
         } catch {
           // Network error — keep existing local state, don't force logout
           return !!token;
+        } finally {
+          isVerifying = false;
         }
       },
 
