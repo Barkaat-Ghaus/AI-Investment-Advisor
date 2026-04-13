@@ -5,6 +5,7 @@ import API_BASE_URL from '../config/api';
 const API_URL = `${API_BASE_URL}/api/auth`;
 
 // Safe localStorage getter for SSR compatibility
+
 const getStoredToken = () => {
   try {
     return typeof window !== 'undefined' ? localStorage.getItem('token') || null : null;
