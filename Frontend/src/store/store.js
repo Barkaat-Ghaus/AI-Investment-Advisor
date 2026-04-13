@@ -201,7 +201,6 @@ const useAuthStore = create(
         const token = getStoredToken();
         if (!token) {
           isVerifying = false;
-          console.error("No token provided");
           set({ user: null, token: null, isAuthenticated: false });
           return false;
         }
