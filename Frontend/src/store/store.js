@@ -40,7 +40,7 @@ const useAuthStore = create(
       login: async ({ email, password }) => {
         try {
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+          const timeoutId = setTimeout(() => controller.abort(new Error('Request timeout')), 60000); // 60 second timeout for Render cold starts
           
           const response = await fetch(`${API_URL}/login`, {
             method: 'POST',
@@ -77,7 +77,11 @@ const useAuthStore = create(
           
           return { success: true };
         } catch (error) {
-          set({ error: error.message, isLoading: false });
+          const isTimeout = error.name === 'AbortError' || error.message === 'Request timeout' || error.message?.includes('aborted');
+          const errorMessage = isTimeout
+            ? 'Request timeout - please try again' 
+            : error.message;
+          set({ error: errorMessage, isLoading: false });
           return { success: false };
         }
       },
@@ -86,7 +90,7 @@ const useAuthStore = create(
         set({ isLoading: true, error: null });
         try {
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+          const timeoutId = setTimeout(() => controller.abort(new Error('Request timeout')), 60000); // 60 second timeout for Render cold starts
           
           const response = await fetch(`${API_URL}/signup`, {
             method: 'POST',
@@ -127,7 +131,8 @@ const useAuthStore = create(
           });
           return { success: true, message: 'Account created successfully!' };
         } catch (error) {
-          const errorMessage = error.name === 'AbortError' 
+          const isTimeout = error.name === 'AbortError' || error.message === 'Request timeout' || error.message?.includes('aborted');
+          const errorMessage = isTimeout
             ? 'Request timeout - please try again' 
             : error.message;
           set({ error: errorMessage, isLoading: false });
