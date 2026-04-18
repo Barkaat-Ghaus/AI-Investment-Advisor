@@ -210,10 +210,18 @@ const useAuthStore = create(
           return false;
         }
         try {
+          // Add timeout to verification to avoid blocking app on long Render cold starts
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+          
           const response = await fetch(`${API_URL}/verify`, {
             method: 'GET',
             headers: { Authorization: `Bearer ${token}` },
+            signal: controller.signal,
           });
+
+          clearTimeout(timeoutId);
+
           if (response.ok) {
             const data = await response.json();
             // Only update state if something actually changed
@@ -223,25 +231,32 @@ const useAuthStore = create(
             });
             return true;
           } else {
-            // Token invalid or expired
-            console.error(`Token verification failed with status: ${response.status}`);
-            try {
-              const errData = await response.json();
-              console.error("Error details:", errData);
-            } catch (e) {}
-
-            // Prevent race condition: if user logged in with a NEW token while this request
-            // was inflight, do NOT wipe the new token!
-            const currentToken = getStoredToken();
-            if (currentToken === token) {
-              localStorage.removeItem('token');
-              localStorage.removeItem('user');
-              set({ user: null, token: null, isAuthenticated: false });
+            // If the server returns 401 or 403, the token is truly invalid/expired.
+            if (response.status === 401 || response.status === 403) {
+              if (process.env.NODE_ENV === 'development') {
+                console.warn(`Token verification failed (Unauthorized): ${response.status}`);
+              }
+              const currentToken = getStoredToken();
+              if (currentToken === token) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                set({ user: null, token: null, isAuthenticated: false });
+              }
+              return false;
+            } else {
+              // 404 (endpoint not deployed yet) or 500 (server issue)
+              // Gracefully handle by keeping local state to avoid logging out users due to server/deployment issues
+              if (process.env.NODE_ENV === 'development') {
+                console.warn(`Token verification endpoint issue (Status: ${response.status}). Keeping local auth state.`);
+              }
+              return !!token;
             }
-            return false;
           }
-        } catch {
-          // Network error — keep existing local state, don't force logout
+        } catch (error) {
+          // Network error or timeout — keep existing local state, don't force logout
+          if (process.env.NODE_ENV === 'development') {
+             console.warn(`Token verification network/timeout error: ${error.message}. Keeping local auth state.`);
+          }
           return !!token;
         } finally {
           isVerifying = false;
