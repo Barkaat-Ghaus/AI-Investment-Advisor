@@ -21,6 +21,11 @@ export const signup = async (req, res) => {
     const user = await User.create({ name, email, password: hashedPassword });
     
     // Generate token for auto-login
+    if (!process.env.JWT_SECRET) {
+      console.error("JWT_SECRET is not set in environment variables");
+      return res.status(500).json({ message: "Server configuration error" });
+    }
+    
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
 
     res.status(201).json({
@@ -29,6 +34,7 @@ export const signup = async (req, res) => {
       user: { id: user._id, name: user.name, email: user.email },
     });
   } catch (error) {
+    console.error("Signup error:", error);
     res.status(500).json({ message: "Signup failed", error: error.message });
   }
 };
@@ -43,6 +49,11 @@ export const login = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: "Invalid email or password" });
 
+    if (!process.env.JWT_SECRET) {
+      console.error("JWT_SECRET is not set in environment variables");
+      return res.status(500).json({ message: "Server configuration error" });
+    }
+
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
 
     res.status(200).json({
@@ -51,6 +62,7 @@ export const login = async (req, res) => {
       user: { id: user._id, name: user.name, email: user.email },
     });
   } catch (error) {
+    console.error("Login error:", error);
     res.status(500).json({ message: "Login failed", error: error.message });
   }
 };
