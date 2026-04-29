@@ -1,8 +1,15 @@
 export const errorHandler = (err, req, res, next) => {
-  console.error("❌ Error:", err.stack);
-
-  res.status(err.statusCode || 500).json({
+  const statusCode = err.statusCode || 500;
+  console.error(`[${new Date().toISOString()}] Error (${statusCode}):`, {
+    message: err.message,
+    path: req.path,
+    method: req.method,
+    stack: err.stack
+  });
+  
+  res.status(statusCode).json({
     success: false,
     message: err.message || "Internal Server Error",
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
   });
 };

@@ -13,6 +13,17 @@ import { errorHandler } from "./middlewares/errorMiddleware.js";
 
 dotenv.config();
 
+// Validate required environment variables
+const requiredEnvVars = ['MONGO_URI', 'JWT_SECRET'];
+const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+if (missingEnvVars.length > 0) {
+  console.error('❌ Missing environment variables:', missingEnvVars.join(', '));
+  console.error('Please set these in your Render dashboard: Environment tab');
+  process.exit(1);
+}
+
+console.log('✅ All required environment variables are set');
+
 const app = express();
 
 // CORS Configuration
@@ -48,6 +59,11 @@ const PORT = process.env.PORT || 3001;
 // Connect MongoDB
 connectDB();
 
+// Health check endpoint
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "OK", timestamp: new Date().toISOString() });
+});
+
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/finance", financeRoutes);
@@ -73,7 +89,11 @@ app.use(errorHandler);
 //    res.send("Login data received");
 // });
 
-app.listen(PORT, () => console.log(`✅ Server running on http://localhost:${PORT}`));
+app.listen(PORT, () => {
+  console.log(`✅ Server running on http://localhost:${PORT}`);
+  console.log(`📝 Health check: GET /health`);
+  console.log(`🔐 Auth endpoints: POST /api/auth/signup, POST /api/auth/login, GET /api/auth/verify`);
+});
 
 
 
