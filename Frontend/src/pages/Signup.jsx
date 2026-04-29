@@ -9,11 +9,13 @@ const Signup = () => {
   const { signup, isLoading, error, clearError, verifyToken } = useAuthStore();
 
   // On mount, check if already logged in with a valid token — if so skip signup
+  // Also clear any previous errors
   useEffect(() => {
+    clearError();
     verifyToken().then((valid) => {
       if (valid) navigate('/home', { replace: true });
     });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [clearError, verifyToken]); // eslint-disable-line react-hooks/exhaustive-deps
   const {
     register,
     handleSubmit,
