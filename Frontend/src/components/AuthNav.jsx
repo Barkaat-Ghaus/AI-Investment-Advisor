@@ -11,7 +11,7 @@ const AuthNav = () => {
         <div className="w-9 h-9 bg-slate-800 rounded-xl flex items-center justify-center text-white font-bold text-lg group-hover:bg-slate-700 transition-colors shadow-sm">
           D
         </div>
-        <span className="text-xl font-bold text-slate-800 tracking-tight">DocGen</span>
+        <span className="text-xl font-bold text-slate-800 tracking-tight">AI Investment Advisor</span>
       </Link>
       
       <div className="flex items-center gap-4">
