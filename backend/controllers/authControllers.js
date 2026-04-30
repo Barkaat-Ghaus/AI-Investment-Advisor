@@ -38,8 +38,18 @@ export const signup = async (req, res) => {
     console.log("[Signup] Password hashed successfully");
 
     // Create user
-    const user = await User.create({ name, email, password: hashedPassword });
-    console.log("[Signup] User created:", user._id);
+    let user;
+    try {
+      user = await User.create({ name, email, password: hashedPassword });
+      console.log("[Signup] User created:", user._id);
+    } catch (createError) {
+      // Handle MongoDB E11000 duplicate key error (email uniqueness constraint)
+      if (createError.code === 11000) {
+        console.warn("[Signup] Duplicate email error:", email);
+        return res.status(400).json({ message: "This email is already registered" });
+      }
+      throw createError;
+    }
     
     // Verify JWT_SECRET exists
     if (!process.env.JWT_SECRET) {
