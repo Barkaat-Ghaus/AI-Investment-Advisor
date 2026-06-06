@@ -11,10 +11,12 @@ const Login = () => {
   // On mount, check if already logged in with a valid token — if so skip login
   // Also clear any previous errors
   useEffect(() => {
+    let isMounted = true;
     clearError();
     verifyToken().then((valid) => {
-      if (valid) navigate('/home', { replace: true });
+      if (valid && isMounted) navigate('/home', { replace: true });
     });
+    return () => { isMounted = false; };
   }, [clearError, verifyToken]); // eslint-disable-line react-hooks/exhaustive-deps
   const {
     register,

@@ -9,10 +9,12 @@ const Signup = () => {
   const { signup, isLoading, error, clearError, verifyToken } = useAuthStore();
 
   useEffect(() => {
+    let isMounted = true;
     clearError();
     verifyToken().then((valid) => {
-      if (valid) navigate('/home', { replace: true });
+      if (valid && isMounted) navigate('/home', { replace: true });
     });
+    return () => { isMounted = false; };
   }, [clearError, verifyToken]); // eslint-disable-line react-hooks/exhaustive-deps
   const {
     register,

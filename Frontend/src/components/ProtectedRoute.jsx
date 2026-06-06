@@ -28,7 +28,7 @@ export default function ProtectedRoute({ children }) {
   }
 
   if (!token || !isAuthenticated) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   return children;
