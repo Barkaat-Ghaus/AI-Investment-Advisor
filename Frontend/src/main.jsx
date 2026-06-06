@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import "./index.css";
 import App from "./App.jsx";
-import Home from "./pages/Home.jsx";
+import LandingPage from "./pages/Landingpage.jsx";
 import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
 import AdvisorPage from "./pages/AdvisorPage.jsx";
@@ -21,34 +21,36 @@ createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
-        {/* Auth routes — rendered standalone, no layout shell */}
-        <Route path="/login" element={<Login />} />
+        {/* Public landing page at root */}
+        <Route path="/" element={<LandingPage />} />
+        {/* backward-compat redirect */}
+        <Route path="/landing" element={<Navigate to="/" replace />} />
+
+        {/* Auth routes — standalone, no layout shell */}
+        <Route path="/login"  element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 
         {/* App shell routes — sidebar + topbar — all protected */}
-        <Route 
-          path="/" 
+        <Route
           element={
             <ProtectedRoute>
               <App />
             </ProtectedRoute>
           }
         >
-          <Route index element={<Home />} />
-          <Route path="advisor" element={<AdvisorPage />} />
-          <Route path="home" element={<YourHome />} />
-          <Route path="markets" element={<MarketData />} />
-          <Route path="risk-analysis" element={<RiskAnalysis />} />
-          <Route path="goals" element={<FinanceGoal />} />
-          <Route path="profile-setup" element={<ProfileQuestion />} />
-          <Route path="profile" element={<Profile />} />
+          <Route path="home"             element={<YourHome />} />
+          <Route path="advisor"          element={<AdvisorPage />} />
+          <Route path="markets"          element={<MarketData />} />
+          <Route path="risk-analysis"    element={<RiskAnalysis />} />
+          <Route path="goals"            element={<FinanceGoal />} />
+          <Route path="profile-setup"    element={<ProfileQuestion />} />
+          <Route path="profile"          element={<Profile />} />
           <Route path="advisory-history" element={<AdvisoryHistoryPage />} />
         </Route>
 
-        {/* Catch-all: redirect to home */}
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        {/* Catch-all */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>
 );
-

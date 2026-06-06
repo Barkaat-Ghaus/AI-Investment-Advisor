@@ -1,21 +1,22 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import useAdvisorStore from '../store/advisorStore' ;
+import useAdvisorStore from '../store/advisorStore';
 import useAuthStore from '../store/store';
 import InvestmentForm from '../components/InvestmentForm';
 import SaveAdvisoryButton from '../components/SaveAdvisoryButton';
-import useFinancialRiskDataStore from '../store/financialRiskDataStore'; 
-import {  
-  TrendingUp, 
-  ShieldAlert, 
-  PieChart, 
-  ArrowRight, 
+import useFinancialRiskDataStore from '../store/financialRiskDataStore';
+import {
+  TrendingUp,
+  ShieldAlert,
+  PieChart,
+  ArrowRight,
   Info,
   Calendar,
   Wallet,
   BadgeAlert,
-  History
-} from 'lucide-react' ;
+  History,
+  Sparkles,
+} from 'lucide-react';
 
 
 
@@ -48,28 +49,54 @@ function CheckRow({ bold, rest }) {
   );
 }
 
+/* ── Allocation skeleton card ──────────────────────────────────── */
+function AllocationSkeleton() {
+  return (
+    <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
+      {[...Array(5)].map((_, i) => (
+        <div key={i} className="p-4 bg-slate-50 rounded-xl border border-slate-100 animate-pulse">
+          <div className="h-8 w-8 bg-slate-200 rounded-lg mb-2" />
+          <div className="h-2.5 w-16 bg-slate-200 rounded mb-2" />
+          <div className="h-5 w-10 bg-slate-300 rounded mb-1" />
+          <div className="h-2 w-14 bg-slate-200 rounded" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ── Derive volatility info from allocation ────────────────────── */
+function deriveVolatilityInfo(allocation) {
+  // Weighted risk score: stocks=9, mutualFunds=6, gold=5, bonds=2.5, cash=0.5
+  const weights = { stocks: 9, mutualFunds: 6, gold: 5, bonds: 2.5, cash: 0.5 };
+  const total = Object.entries(allocation).reduce(
+    (acc, [key, pct]) => acc + (weights[key] ?? 0) * pct,
+    0
+  ) / 100;
+
+  if (total >= 7)   return { label: 'High',     pct: '85%', color: 'from-amber-500 to-red-500' };
+  if (total >= 4.5) return { label: 'Moderate', pct: '55%', color: 'from-emerald-500 to-amber-500' };
+  return             { label: 'Low',      pct: '25%', color: 'from-emerald-400 to-emerald-600' };
+}
+
 /* ── Portfolio Report Component ────────────────────────────────── */
-function PortfolioReport({ values, calculated, regionalData }) {
+function PortfolioReport({ values, calculated, regionalData, aiAllocation, loadingAllocation }) {
   if (!calculated) return null;
 
   const { investment, duration, risk } = values;
-  
-  // Calculate recommended allocation based on risk tolerance
-  const getAllocation = (riskLevel) => {
+
+  // Fallback allocation (used only while AI response is pending)
+  const getFallbackAllocation = (riskLevel) => {
     switch (riskLevel) {
-      case 'low':
-        return { stocks: 10, mutualFunds: 20, bonds: 40, gold: 15, cash: 15 };
-      case 'medium':
-        return { stocks: 30, mutualFunds: 30, bonds: 20, gold: 10, cash: 10 };
-      case 'high':
-        return { stocks: 50, mutualFunds: 30, bonds: 5, gold: 10, cash: 5 };
-      default:
-        return { stocks: 30, mutualFunds: 30, bonds: 20, gold: 10, cash: 10 };
+      case 'low':  return { stocks: 10, mutualFunds: 20, bonds: 40, gold: 15, cash: 15 };
+      case 'high': return { stocks: 50, mutualFunds: 30, bonds: 5,  gold: 10, cash: 5  };
+      default:     return { stocks: 30, mutualFunds: 30, bonds: 20, gold: 10, cash: 10 };
     }
   };
 
-  const allocation = getAllocation(risk);
-  
+  const allocation     = aiAllocation || getFallbackAllocation(risk);
+  const isAIAllocation = !!aiAllocation;
+
   // Calculate projected values
   const calculateProjection = (amount, rate, years) => {
     const r = parseFloat(rate) / 100;
@@ -78,24 +105,44 @@ function PortfolioReport({ values, calculated, regionalData }) {
 
   const totalProjected = Object.entries(allocation).reduce((acc, [asset, pct]) => {
     const assetAmount = (investment * pct) / 100;
-    const rate = regionalData[asset].expectedReturn;
+    const rate = regionalData[asset]?.expectedReturn ?? '0';
     return acc + calculateProjection(assetAmount, rate, duration);
   }, 0);
 
-  const totalReturn = ((totalProjected - investment) / investment) * 100;
+  const totalReturn    = ((totalProjected - investment) / investment) * 100;
+  const volatilityInfo = deriveVolatilityInfo(allocation);
+
+  // Format pct for display — round to 1 decimal, strip trailing .0
+  const fmtPct = (n) => {
+    const r = Math.round(n * 10) / 10;
+    return Number.isInteger(r) ? `${r}` : `${r}`;
+  };
 
   return (
     <div className="anim-fade-up space-y-6 mt-10">
-      <div className="flex items-center gap-3 mb-2">
+      {/* ── Section header ── */}
+      <div className="flex flex-wrap items-center gap-3 mb-2">
         <div className="p-2 bg-indigo-100 rounded-lg">
           <PieChart className="w-5 h-5 text-indigo-600" />
         </div>
         <h2 className="text-2xl font-bold text-slate-800">Portfolio Comprehensive Report</h2>
+
+        {loadingAllocation ? (
+          <span className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full bg-amber-100 text-amber-700 animate-pulse">
+            <Sparkles className="w-3 h-3" />
+            AI personalising allocation…
+          </span>
+        ) : isAIAllocation ? (
+          <span className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full bg-emerald-100 text-emerald-700">
+            <Sparkles className="w-3 h-3" />
+            AI-Personalised
+          </span>
+        ) : null}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Summary Card */}
+
+        {/* ── Growth Projection Card ── */}
         <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="p-6 border-b border-slate-100 bg-slate-50/50">
             <h3 className="font-bold text-slate-800 flex items-center gap-2">
@@ -106,7 +153,9 @@ function PortfolioReport({ values, calculated, regionalData }) {
           <div className="p-8">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
               <div>
-                <p className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-1">Estimated Value after {duration} years</p>
+                <p className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-1">
+                  Estimated Value after {duration} years
+                </p>
                 <h4 className="text-4xl font-extrabold text-slate-900">
                   ₹{Math.round(totalProjected).toLocaleString()}
                 </h4>
@@ -129,43 +178,91 @@ function PortfolioReport({ values, calculated, regionalData }) {
               </div>
             </div>
 
-            <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
-              {Object.entries(allocation).filter(([_, pct]) => pct > 0).map(([asset, pct]) => (
-                <div key={asset} className="p-4 bg-slate-50 rounded-xl border border-slate-100 hover:border-indigo-200 transition-colors">
-                  <div className="text-2xl mb-1">{regionalData[asset].emoji}</div>
-                  <p className="text-[10px] text-slate-500 font-bold uppercase mb-0.5">{regionalData[asset].label}</p>
-                  <p className="text-lg font-bold text-slate-800">{pct}%</p>
-                  <p className="text-[10px] text-emerald-600 font-bold mt-1">Exp: {regionalData[asset].expectedReturn}</p>
-                </div>
-              ))}
-            </div>
+            {/* ── Asset allocation cards ── */}
+            {loadingAllocation ? (
+              <AllocationSkeleton />
+            ) : (
+              <div className="mt-10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                {Object.entries(allocation)
+                  .filter(([_, pct]) => pct > 0)
+                  .map(([asset, pct]) => (
+                    <div
+                      key={asset}
+                      className="p-4 bg-slate-50 rounded-xl border border-slate-100 hover:border-indigo-200 hover:shadow-sm transition-all"
+                    >
+                      <div className="text-2xl mb-1">{regionalData[asset]?.emoji}</div>
+                      <p className="text-[10px] text-slate-500 font-bold uppercase mb-0.5">
+                        {regionalData[asset]?.label}
+                      </p>
+                      <p className="text-lg font-bold text-slate-800">{fmtPct(pct)}%</p>
+                      <p className="text-[10px] text-emerald-600 font-bold mt-1">
+                        Exp: {regionalData[asset]?.expectedReturn}
+                      </p>
+                    </div>
+                  ))}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Risk Assessment Card */}
+        {/* ── Risk Analysis Card ── */}
         <div className="bg-[#0f172a] rounded-2xl p-6 text-white shadow-xl flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-8">
               <h3 className="font-bold text-slate-300 text-sm uppercase tracking-widest">Risk Analysis</h3>
               <ShieldAlert className="w-5 h-5 text-amber-500" />
             </div>
-            
+
             <div className="space-y-6">
+              {/* Dynamic volatility bar */}
               <div>
                 <div className="flex justify-between text-xs mb-2">
                   <span className="text-slate-400">Portfolio Volatility</span>
-                  <span className="text-white font-bold">Moderate</span>
+                  <span className="text-white font-bold">{volatilityInfo.label}</span>
                 </div>
                 <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                  <div className="w-[60%] h-full bg-linear-to-r from-emerald-500 to-amber-500 rounded-full" />
+                  <div
+                    className={`h-full bg-gradient-to-r ${volatilityInfo.color} rounded-full transition-all duration-700`}
+                    style={{ width: volatilityInfo.pct }}
+                  />
                 </div>
               </div>
 
-              <div className="p-4 bg-white/5 rounded-xl border border-white/10 space-y-3">
+              {/* Allocation breakdown mini-list */}
+              <div className="space-y-2">
+                {loadingAllocation ? (
+                  <div className="space-y-2 animate-pulse">
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="flex justify-between items-center">
+                        <div className="h-2 w-20 bg-slate-700 rounded" />
+                        <div className="h-2 w-8 bg-slate-700 rounded" />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  Object.entries(allocation)
+                    .sort(([, a], [, b]) => b - a)
+                    .map(([asset, pct]) => (
+                      <div key={asset} className="flex items-center justify-between text-xs">
+                        <span className="text-slate-400 flex items-center gap-1.5">
+                          <span>{regionalData[asset]?.emoji}</span>
+                          {regionalData[asset]?.label?.replace(/ \(.*\)/, '')}
+                        </span>
+                        <span className="text-white font-bold">{fmtPct(pct)}%</span>
+                      </div>
+                    ))
+                )}
+              </div>
+
+              {/* Info quote — properly interpolated */}
+              <div className="p-4 bg-white/5 rounded-xl border border-white/10">
                 <div className="flex items-start gap-3">
                   <Info className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
                   <p className="text-xs text-slate-400 leading-relaxed italic">
-                    "This allocation balances growth through {allocation.stocks}% equities while maintaining stability with {allocation.bonds}% in debt instruments."
+                    {isAIAllocation
+                      ? `AI tailored this allocation with ${fmtPct(allocation.stocks)}% equities and ${fmtPct(allocation.bonds)}% bonds based on your profile.`
+                      : `This allocation balances growth through ${fmtPct(allocation.stocks)}% equities while maintaining stability with ${fmtPct(allocation.bonds)}% in debt instruments.`
+                    }
                   </p>
                 </div>
               </div>
@@ -173,44 +270,50 @@ function PortfolioReport({ values, calculated, regionalData }) {
           </div>
 
           <div className="mt-8 pt-6 border-t border-white/10 space-y-3">
-          <SaveAdvisoryButton disabled={!calculated} />
-             <button className="w-full py-3 bg-white text-slate-900 rounded-xl text-sm font-bold flex items-center justify-center gap-2 hover:bg-slate-100 transition-colors">
-               Download PDF Report
-               <ArrowRight className="w-4 h-4" />
-             </button>
+            <SaveAdvisoryButton disabled={!calculated} />
+            <button className="w-full py-3 bg-white text-slate-900 rounded-xl text-sm font-bold flex items-center justify-center gap-2 hover:bg-slate-100 transition-colors">
+              Download PDF Report
+              <ArrowRight className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Recommended Actions */}
+      {/* ── Recommended Actions ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-6">
-         <div className="p-5 bg-white rounded-2xl border border-slate-200 shadow-sm flex items-start gap-4">
-            <div className="p-2.5 bg-rose-50 rounded-xl">
-              <Calendar className="w-5 h-5 text-rose-500" />
-            </div>
-            <div>
-              <h4 className="font-bold text-slate-800 text-sm mb-1">Rebalancing Schedule</h4>
-              <p className="text-xs text-slate-500">Review and rebalance every 6 months to maintain your {risk} risk target.</p>
-            </div>
-         </div>
-         <div className="p-5 bg-white rounded-2xl border border-slate-200 shadow-sm flex items-start gap-4">
-            <div className="p-2.5 bg-blue-50 rounded-xl">
-              <Wallet className="w-5 h-5 text-blue-500" />
-            </div>
-            <div>
-              <h4 className="font-bold text-slate-800 text-sm mb-1">Tax Optimization</h4>
-              <p className="text-xs text-slate-500">Utilize ELSS funds and tax-free bonds to enhance your net returns by 1-2%.</p>
-            </div>
-         </div>
-         <div className="p-5 bg-white rounded-2xl border border-slate-200 shadow-sm flex items-start gap-4">
-            <div className="p-2.5 bg-amber-50 rounded-xl">
-              <BadgeAlert className="w-5 h-5 text-amber-500" />
-            </div>
-            <div>
-              <h4 className="font-bold text-slate-800 text-sm mb-1">Emergency Fund</h4>
-              <p className="text-xs text-slate-500">Ensure at least 6 months of monthly income (₹{values.income * 6}) is kept in high-liquidity cash.</p>
-            </div>
-         </div>
+        <div className="p-5 bg-white rounded-2xl border border-slate-200 shadow-sm flex items-start gap-4">
+          <div className="p-2.5 bg-rose-50 rounded-xl">
+            <Calendar className="w-5 h-5 text-rose-500" />
+          </div>
+          <div>
+            <h4 className="font-bold text-slate-800 text-sm mb-1">Rebalancing Schedule</h4>
+            <p className="text-xs text-slate-500">
+              Review and rebalance every 6 months to maintain your {risk} risk target.
+            </p>
+          </div>
+        </div>
+        <div className="p-5 bg-white rounded-2xl border border-slate-200 shadow-sm flex items-start gap-4">
+          <div className="p-2.5 bg-blue-50 rounded-xl">
+            <Wallet className="w-5 h-5 text-blue-500" />
+          </div>
+          <div>
+            <h4 className="font-bold text-slate-800 text-sm mb-1">Tax Optimization</h4>
+            <p className="text-xs text-slate-500">
+              Utilize ELSS funds and tax-free bonds to enhance your net returns by 1-2%.
+            </p>
+          </div>
+        </div>
+        <div className="p-5 bg-white rounded-2xl border border-slate-200 shadow-sm flex items-start gap-4">
+          <div className="p-2.5 bg-amber-50 rounded-xl">
+            <BadgeAlert className="w-5 h-5 text-amber-500" />
+          </div>
+          <div>
+            <h4 className="font-bold text-slate-800 text-sm mb-1">Emergency Fund</h4>
+            <p className="text-xs text-slate-500">
+              Ensure at least 6 months of monthly income (₹{(values.income * 6).toLocaleString()}) is kept in high-liquidity cash.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -219,7 +322,16 @@ function PortfolioReport({ values, calculated, regionalData }) {
 export default function AdvisorPage() {
   const navigate = useNavigate();
   const { isAuthenticated, token } = useAuthStore();
-  const { values, calculated, aiInsights, loadingInsights, setValues, handleCalculate } = useAdvisorStore();
+  const {
+    values,
+    calculated,
+    aiInsights,
+    aiAllocation,
+    loadingInsights,
+    loadingAllocation,
+    setValues,
+    handleCalculate,
+  } = useAdvisorStore();
   const { region, getRiskData } = useFinancialRiskDataStore();
   const regionalData = getRiskData(region);
 
@@ -229,10 +341,7 @@ export default function AdvisorPage() {
     }
   }, [isAuthenticated, token, navigate]);
 
-  const handleChange = (field, val) => {
-    setValues(field, val);
-  };
-
+  const handleChange = (field, val) => setValues(field, val);
   const handleCalculateWithToken = () => handleCalculate(token);
 
   return (
@@ -258,13 +367,12 @@ export default function AdvisorPage() {
           </Link>
         </div>
 
-        {/* Two-column layout: stacks on mobile, side-by-side on lg+ */}
+        {/* Two-column layout */}
         <div className="anim-fade-up delay-1 grid grid-cols-1 lg:grid-cols-[1fr_268px] gap-5 items-start">
           <InvestmentForm values={values} onChange={handleChange} onCalculate={handleCalculateWithToken} />
 
           {/* Right stacked cards */}
           <div className="flex flex-col gap-3.5">
-
             {(calculated || loadingInsights) && (
               <DarkCard
                 title="AI Advisor Insights"
@@ -293,8 +401,13 @@ export default function AdvisorPage() {
           </div>
         </div>
 
-        <PortfolioReport values={values} calculated={calculated} regionalData={regionalData} />
-
+        <PortfolioReport
+          values={values}
+          calculated={calculated}
+          regionalData={regionalData}
+          aiAllocation={aiAllocation}
+          loadingAllocation={loadingAllocation}
+        />
 
       </main>
 

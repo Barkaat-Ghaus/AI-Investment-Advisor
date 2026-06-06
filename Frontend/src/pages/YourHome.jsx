@@ -1,116 +1,270 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import useAuthStore from '../store/store';
-import { 
-  Sparkles, 
-  Home, 
-  Zap, 
-  Target, 
-  BarChart3, 
+import useFinancialRiskDataStore from '../store/financialRiskDataStore';
+import {
+  BrainCircuit,
   TrendingUp,
+  ShieldCheck,
+  BarChart2,
+  Target,
+  History,
   ArrowRight,
-  ShieldCheck
+  Sparkles,
+  Wallet,
+  Clock,
+  ChevronRight,
+  User,
+  Activity,
+  Zap,
 } from 'lucide-react';
 
-/* ── Home Hub Card ─────────────────────────────────────────────── */
-function HubCard({ title, desc, icon: Icon, path, color }) {
+/* ─── Premium Quick-Action Card ─────────────────────────────── */
+function ActionCard({ icon: Icon, label, sub, path, gradient, glowColor }) {
   return (
-    <Link to={path} className="group no-underline block">
-      <div className="w-full bg-white rounded-4xl border border-slate-100 p-6 md:p-8 shadow-sm hover:shadow-xl transition-all duration-300 hover:border-indigo-100 flex flex-col md:flex-row items-center md:items-center gap-6 lg:gap-10">
-        <div className={`w-20 h-20 shrink-0 rounded-3xl ${color} flex items-center justify-center group-hover:scale-110 transition-transform`}>
-          <Icon className="w-10 h-10" />
+    <Link to={path} className="no-underline group">
+      <div 
+        className="relative bg-white rounded-2xl border border-slate-100 p-5 shadow-sm
+          hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col h-full"
+      >
+        {/* Glow effect on hover */}
+        <div 
+          className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+          style={{
+            background: `radial-gradient(circle at top right, ${glowColor}15, transparent 70%)`
+          }}
+        />
+
+        {/* Icon wrapper with custom gradient */}
+        <div 
+          className="inline-flex w-11 h-11 rounded-xl items-center justify-center mb-4 text-white shadow-md transition-transform duration-300 group-hover:scale-110"
+          style={{ background: gradient }}
+        >
+          <Icon size={18} />
         </div>
-        <div className="flex-1 text-center md:text-left">
-          <h3 className="text-2xl font-bold text-slate-800 mb-2 group-hover:text-indigo-600 transition-colors uppercase tracking-tight">{title}</h3>
-          <p className="text-base text-slate-500 leading-relaxed max-w-2xl">{desc}</p>
-        </div>
-        <div className="shrink-0 flex items-center gap-3 bg-slate-50 px-6 py-4 rounded-2xl text-indigo-600 font-black text-xs uppercase tracking-[0.1em] group-hover:bg-indigo-600 group-hover:text-white transition-all">
-          Explore Module <ArrowRight className="w-4 h-4" />
+
+        <h3 className="text-[13.5px] font-bold text-slate-800 mb-1 group-hover:text-indigo-600 transition-colors">
+          {label}
+        </h3>
+        <p className="text-[11.5px] text-slate-400 leading-relaxed flex-1">{sub}</p>
+
+        <div className="mt-4 flex items-center gap-1 text-[11px] font-bold text-indigo-600 opacity-0 group-hover:opacity-100 translate-x-[-4px] group-hover:translate-x-0 transition-all duration-300">
+          Open module <ChevronRight size={11} />
         </div>
       </div>
     </Link>
   );
 }
 
-export default function YourHome() {
-  const { user } = useAuthStore();
+/* ─── Premium Stat Card ─────────────────────────────────────── */
+function StatCard({ label, value, sub, icon: Icon, gradient, textColor }) {
+  return (
+    <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm hover:shadow-md transition-all duration-300 flex items-start gap-4">
+      <div 
+        className="w-11 h-11 shrink-0 rounded-xl flex items-center justify-center text-white shadow-sm"
+        style={{ background: gradient }}
+      >
+        <Icon size={18} />
+      </div>
+      <div className="min-w-0">
+        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">{label}</p>
+        <p className={`text-2xl font-extrabold leading-none ${textColor}`}>{value}</p>
+        {sub && <p className="text-[11.5px] text-slate-400 mt-1.5 font-medium flex items-center gap-1">{sub}</p>}
+      </div>
+    </div>
+  );
+}
 
-  const HUB_ITEMS = [
+export default function YourHome() {
+  const { user }        = useAuthStore();
+  const { region }      = useFinancialRiskDataStore();
+
+  const hour      = new Date().getHours();
+  const greeting  = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const firstName = user?.name?.split(' ')[0] || 'Investor';
+
+  const QUICK_ACTIONS = [
     {
-      title: "AI Advisor",
-      desc: "Receive institutional-grade investment strategies tailored to your income, savings, and risk appetite.",
-      icon: Zap,
-      path: "/advisor",
-      color: "bg-amber-100 text-amber-600"
+      icon: BrainCircuit,
+      label: 'AI Advisor',
+      sub: 'Get a personalised asset allocation recommendation.',
+      path: '/advisor',
+      gradient: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+      glowColor: '#6366f1',
     },
     {
-      title: "Finance Goals",
-      desc: "Plan for retirement, a new home, or child education. See exactly when you'll hit your targets.",
-      icon: Target,
-      path: "/goals",
-      color: "bg-indigo-100 text-indigo-600"
-    },
-    {
-      title: "Risk Analysis",
-      desc: "Deep dive into asset class volatility. Compare India vs US market risks using 5-year historical data.",
       icon: ShieldCheck,
-      path: "/risk-analysis",
-      color: "bg-rose-100 text-rose-600"
+      label: 'Risk Analysis',
+      sub: 'Explore and compare asset class risk & volatility.',
+      path: '/risk-analysis',
+      gradient: 'linear-gradient(135deg, #ec4899, #f43f5e)',
+      glowColor: '#ec4899',
     },
     {
-      title: "Market Data",
-      desc: "Real-time tracking of top-performing stocks and commodities across global exchanges.",
-      icon: BarChart3,
-      path: "/markets",
-      color: "bg-emerald-100 text-emerald-600"
-    }
+      icon: BarChart2,
+      label: 'Market Data',
+      sub: 'Track top stock & commodity exchange metrics.',
+      path: '/markets',
+      gradient: 'linear-gradient(135deg, #10b981, #059669)',
+      glowColor: '#10b981',
+    },
+    {
+      icon: Target,
+      label: 'Finance Goals',
+      sub: 'Define, adjust, and achieve your financial targets.',
+      path: '/goals',
+      gradient: 'linear-gradient(135deg, #f59e0b, #ef4444)',
+      glowColor: '#f59e0b',
+    },
+    {
+      icon: History,
+      label: 'Advisory History',
+      sub: 'Review your previously saved portfolio reports.',
+      path: '/advisory-history',
+      gradient: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+      glowColor: '#3b82f6',
+    },
+    {
+      icon: User,
+      label: 'My Profile',
+      sub: 'View & modify your system income & risk setup.',
+      path: '/profile',
+      gradient: 'linear-gradient(135deg, #14b8a6, #0d9488)',
+      glowColor: '#14b8a6',
+    },
   ];
 
   return (
-    <main className="text-slate-800 font-sans w-full p-6 md:p-10 lg:p-16 min-h-[calc(100vh-80px)] bg-linear-to-b from-slate-50 to-white overflow-y-auto">
-      <div className="max-w-6xl mx-auto space-y-12">
-        
-        {/* Hero Greeting */}
-        <div className="anim-fade-up space-y-4">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 rounded-full text-indigo-600 text-xs font-bold uppercase tracking-widest border border-indigo-100">
-            <Sparkles className="w-3 h-3" />
-            Welcome Back to Global Wealth
-          </div>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-[#0d1f3d] tracking-tighter">
-            Hello, <span className="text-indigo-600">{user?.name}</span>
-          </h1>
-          <p className="text-xl text-slate-500 max-w-2xl leading-relaxed">
-            Your centralized financial command center. Select a module below to begin your wealth management journey.
-          </p>
-        </div>
+    <main className="px-4 sm:px-6 lg:px-10 pt-6 sm:pt-8 pb-16 max-w-7xl mx-auto">
+      
+      {/* ── Injection of Subtle Animations ─────────────────────── */}
+      <style>{`
+        @keyframes float-subtle {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-4px); }
+        }
+        .animate-float-subtle {
+          animation: float-subtle 4s ease-in-out infinite;
+        }
+      `}</style>
 
-        {/* Navigation Grid */}
-        <div className="anim-fade-up delay-1 flex flex-col gap-6 pb-12">
-          {HUB_ITEMS.map((item, idx) => (
-            <HubCard key={idx} {...item} />
+      {/* ── Hero Banner ──────────────────────────────────────────── */}
+      <div className="relative rounded-3xl overflow-hidden mb-8
+        bg-gradient-to-br from-[#0b1329] via-[#0d1f3d] to-[#112d52]
+        p-8 sm:p-10 shadow-xl shadow-[#0d1f3d]/20 border border-white/[0.04]">
+        
+        {/* Glow Spheres */}
+        <div className="absolute -top-12 -right-12 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-12 -left-12 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <span className="flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1
+                rounded-full bg-emerald-400/15 text-emerald-400 border border-emerald-400/20 uppercase tracking-wider">
+                <Sparkles size={10} className="text-emerald-400 animate-pulse" /> AI-Powered Advisory
+              </span>
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight mb-2">
+              {greeting}, <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-300">{firstName}</span> 👋
+            </h1>
+            <p className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-xl">
+              Welcome back to your financial command center. Harness advanced analytics and customized portfolio models to guide your wealth.
+            </p>
+          </div>
+
+          <Link to="/advisor" className="no-underline shrink-0">
+            <button className="flex items-center gap-2.5 px-6 py-4 bg-white text-[#0d1f3d]
+              rounded-2xl font-bold text-[14px] shadow-lg hover:shadow-xl hover:bg-slate-50
+              hover:-translate-y-0.5 transition-all duration-200 active:scale-95">
+              <BrainCircuit size={16} className="text-indigo-600" />
+              Open AI Advisor
+              <ArrowRight size={14} className="text-slate-400 group-hover:translate-x-0.5 transition-transform" />
+            </button>
+          </Link>
+        </div>
+      </div>
+
+      {/* ── Stats Row ────────────────────────────────────────────── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <StatCard
+          label="Region Focus"
+          value={region === 'india' ? 'India' : 'United States'}
+          sub={<><span className="text-emerald-500 font-bold">●</span> Active market insights</>}
+          icon={TrendingUp}
+          gradient="linear-gradient(135deg, #818cf8, #4f46e5)"
+          textColor="text-slate-800"
+        />
+        <StatCard
+          label="AI Engine Modules"
+          value="5 Active"
+          sub="Institutional grade validation"
+          icon={Sparkles}
+          gradient="linear-gradient(135deg, #a78bfa, #7c3aed)"
+          textColor="text-slate-800"
+        />
+        <StatCard
+          label="Diversification"
+          value="5 Classes"
+          sub="Stocks · Bonds · Gold · MF · Cash"
+          icon={Wallet}
+          gradient="linear-gradient(135deg, #34d399, #059669)"
+          textColor="text-slate-800"
+        />
+        <StatCard
+          label="Adviser Session"
+          value="Secure"
+          sub="Zod-validated schema"
+          icon={Clock}
+          gradient="linear-gradient(135deg, #fbbf24, #d97706)"
+          textColor="text-slate-800"
+        />
+      </div>
+
+      {/* ── Quick Actions Grid ───────────────────────────────────── */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-[11px] font-extrabold text-slate-400 uppercase tracking-[0.15em]">
+            Interactive Modules
+          </h2>
+          <span className="h-px bg-slate-100 flex-1 ml-4" />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {QUICK_ACTIONS.map((a) => (
+            <ActionCard key={a.path} {...a} />
           ))}
         </div>
+      </div>
 
-        {/* Secondary Info/Quick Stats */}
-        <div className="anim-fade-up delay-2 bg-[#0d1f3d] rounded-[3rem] p-10 text-white relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-10 opacity-10 group-hover:scale-110 transition-transform duration-1000">
-            <TrendingUp className="w-48 h-48" />
+      {/* ── Premium Bottom Section / Info Banner ────────────────────────────── */}
+      <div className="relative rounded-2xl bg-gradient-to-r from-indigo-900 to-slate-900
+        p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 border border-indigo-950/20 shadow-md">
+        
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 shrink-0">
+            <Activity size={22} className="animate-pulse" />
           </div>
-          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
-            <div className="max-w-xl">
-              <h2 className="text-3xl font-bold mb-4">Ready to optimize your portfolio?</h2>
-              <p className="text-slate-400 leading-relaxed">
-                Connect your accounts and our AI will automatically scan for high-risk assets and tax optimization opportunities across your global investments.
-              </p>
-            </div>
-          <button className="shrink-0 px-8 sm:px-10 py-4 sm:py-5 bg-white text-[#0d1f3d] font-bold rounded-2xl hover:bg-slate-100 transition-all shadow-xl active:scale-95 whitespace-nowrap">
-              Connect Portfolios
-            </button>
+          <div>
+            <p className="text-white font-bold text-base mb-0.5">
+              Ready to generate your personalized wealth roadmap?
+            </p>
+            <p className="text-indigo-200 text-xs sm:text-[13px] leading-normal">
+              Enter your income metrics, financial timeline, and risk tolerance to obtain optimized targets.
+            </p>
           </div>
         </div>
         
-        <div className="h-10" />
+        <Link to="/advisor" className="no-underline shrink-0">
+          <button className="flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white
+            rounded-xl font-bold text-sm hover:opacity-95 transition-all
+            hover:-translate-y-0.5 active:scale-95 shadow-md shadow-emerald-950/25">
+            <Zap size={14} fill="currentColor" />
+            Get Started
+            <ArrowRight size={14} />
+          </button>
+        </Link>
       </div>
+
     </main>
   );
 }

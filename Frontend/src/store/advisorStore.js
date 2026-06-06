@@ -13,20 +13,25 @@ const useAdvisorStore = create((set, get) => ({
   values: DEFAULT_VALUES,
   calculated: false,
   aiInsights: [],
+  aiAllocation: null,       // AI-generated allocation percentages
   loadingInsights: false,
+  loadingAllocation: false, // loading state for allocation
   savingAdvisory: false,
   saveError: null,
   saveSuccess: null,
 
   setValues: (field, val) => set((state) => ({
     values: { ...state.values, [field]: val },
-    calculated: false
+    calculated: false,
+    aiAllocation: null,       // clear stale AI allocation when inputs change
   })),
 
   handleCalculate: async (token) => {
-    set({ calculated: true, loadingInsights: true });
+    set({ calculated: true, loadingInsights: true, loadingAllocation: true, aiAllocation: null });
+    const { values } = get();
+
+    // ── 1. Fetch AI insights (existing) ──────────────────────────────
     try {
-      const { values } = get();
       const message = `Generate exactly 5 bullet points (separated by '|') of direct investment advice, each between 20 and 60 words, for an investor with ₹${values.income} monthly income, investing ₹${values.investment}, duration ${values.duration} years, ${values.risk} risk tolerance. Do not include introductory text, markdown, or numbers. Just the 5 points separated by '|'.`;
 
       const headers = { "Content-Type": "application/json" };
@@ -54,6 +59,33 @@ const useAdvisorStore = create((set, get) => ({
       set({ aiInsights: ["Error fetching real-time AI insights.", "Please check your network connection."] });
     } finally {
       set({ loadingInsights: false });
+    }
+
+    // ── 2. Fetch AI-generated portfolio allocation ────────────────────
+    try {
+      const headers = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
+      const allocRes = await fetch(`${API_BASE_URL}/api/advisory/ai-allocation`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          income:     values.income,
+          investment: values.investment,
+          duration:   values.duration,
+          risk:       values.risk,
+          goal:       values.goal,
+        }),
+      });
+
+      const allocData = await allocRes.json();
+      if (allocData.allocation) {
+        set({ aiAllocation: allocData.allocation });
+      }
+    } catch {
+      // allocation falls back to null → frontend will use sensible hardcoded defaults
+    } finally {
+      set({ loadingAllocation: false });
     }
   },
 
@@ -88,21 +120,16 @@ const useAdvisorStore = create((set, get) => ({
         return { success: false, message: 'No advisory insights' };
       }
       
-      // Get allocation percentages based on risk
-      const getAllocation = (riskLevel) => {
+      // Use AI allocation if available, otherwise fall back to rule-based defaults
+      const aiAllocation = get().aiAllocation;
+      const getFallbackAllocation = (riskLevel) => {
         switch (riskLevel) {
-          case 'low':
-            return { stocks: 10, bonds: 40, gold: 15, mutualFunds: 20, cash: 15 };
-          case 'medium':
-            return { stocks: 30, bonds: 20, gold: 10, mutualFunds: 30, cash: 10 };
-          case 'high':
-            return { stocks: 50, bonds: 5, gold: 10, mutualFunds: 30, cash: 5 };
-          default:
-            return { stocks: 30, bonds: 20, gold: 10, mutualFunds: 30, cash: 10 };
+          case 'low':  return { stocks: 10, bonds: 40, gold: 15, mutualFunds: 20, cash: 15 };
+          case 'high': return { stocks: 50, bonds: 5,  gold: 10, mutualFunds: 30, cash: 5  };
+          default:     return { stocks: 30, bonds: 20, gold: 10, mutualFunds: 30, cash: 10 };
         }
       };
-
-      const allocation = getAllocation(values.risk);
+      const allocation = aiAllocation || getFallbackAllocation(values.risk);
 
       const advisoryData = {
         user_id: userId,

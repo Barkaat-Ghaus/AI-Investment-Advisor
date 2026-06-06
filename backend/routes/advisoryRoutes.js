@@ -7,9 +7,13 @@ import {
   deleteAdvisory,
   getAdvisoriesByProfile,
 } from "../controllers/advisoryController.js";
+import { getAIAllocation } from "../controllers/allocationController.js";
 import protect from "../middlewares/authMiddlware.js";
 
 const router = express.Router();
+
+// AI-generated portfolio allocation (auth required)
+router.post("/ai-allocation", protect, getAIAllocation);
 
 // Create new advisory (auth required)
 router.post("/", protect, createAdvisory);

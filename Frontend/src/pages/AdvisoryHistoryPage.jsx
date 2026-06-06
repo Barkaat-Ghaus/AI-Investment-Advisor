@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
-import { History, TrendingUp } from 'lucide-react';
+import { History, ShieldCheck } from 'lucide-react';
 import useAuthStore from '../store/store';
 import AdvisoryHistory from '../components/AdvisoryHistory';
 
