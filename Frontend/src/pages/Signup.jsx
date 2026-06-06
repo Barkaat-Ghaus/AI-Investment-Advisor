@@ -32,7 +32,7 @@ const Signup = () => {
     clearError();
     const result = await signup(data);
     if (result?.success) {
-      navigate('/home', { replace: true });
+      navigate('/login', { replace: true });
     }
   };
 
