@@ -6,7 +6,7 @@ import AuthNav from '../components/AuthNav';
 
 const Signup = () => {
   const navigate = useNavigate();
-  const { signup, isLoading, error, clearError, verifyToken } = useAuthStore();
+  const { signup, logout, isLoading, error, clearError, verifyToken } = useAuthStore();
 
   useEffect(() => {
     let isMounted = true;
@@ -34,6 +34,8 @@ const Signup = () => {
     clearError();
     const result = await signup(data);
     if (result?.success) {
+      // Clear the auto-login state set by signup so Login page doesn't skip straight to /home
+      logout();
       navigate('/login', { replace: true });
     }
   };
