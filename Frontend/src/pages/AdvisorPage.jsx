@@ -237,29 +237,29 @@ export default function AdvisorPage() {
 
   return (
     <>
-      <main className="flex-1 px-10 pt-9 pb-16 max-w-7xl">
+      <main className="flex-1 px-4 sm:px-6 lg:px-10 pt-6 sm:pt-9 pb-16 max-w-7xl">
 
         {/* Page header */}
-        <div className="anim-fade-up mb-7 flex items-center justify-between">
+        <div className="anim-fade-up mb-7 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <p className="text-[10.5px] font-bold text-[#2a6a3f] tracking-[0.14em] mb-2 uppercase">
               Investment Profile Input
             </p>
-            <h1 className="text-[clamp(24px,3vw,36px)] font-extrabold text-[#0d1f3d] leading-tight tracking-tight">
+            <h1 className="text-[clamp(22px,3vw,36px)] font-extrabold text-[#0d1f3d] leading-tight tracking-tight">
               Define your financial Profile.
             </h1>
           </div>
           <Link
             to="/advisory-history"
-            className="flex items-center gap-2 px-5 py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-colors no-underline whitespace-nowrap"
+            className="self-start sm:self-auto flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-colors no-underline whitespace-nowrap"
           >
             <History className="w-4 h-4" />
             View History
           </Link>
         </div>
 
-        {/* Two-column layout */}
-        <div className="anim-fade-up delay-1 grid gap-5 items-start" style={{ gridTemplateColumns: '1fr 268px' }}>
+        {/* Two-column layout: stacks on mobile, side-by-side on lg+ */}
+        <div className="anim-fade-up delay-1 grid grid-cols-1 lg:grid-cols-[1fr_268px] gap-5 items-start">
           <InvestmentForm values={values} onChange={handleChange} onCalculate={handleCalculateWithToken} />
 
           {/* Right stacked cards */}
@@ -299,7 +299,7 @@ export default function AdvisorPage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-200 bg-white px-10 py-3.5 flex justify-between items-center flex-wrap gap-2">
+      <footer className="border-t border-slate-200 bg-white px-4 sm:px-10 py-3.5 flex justify-between items-center flex-wrap gap-2">
         <span className="text-[11px] text-slate-400 font-medium tracking-[0.06em] uppercase">
           Global Wealth Management © 2025
         </span>

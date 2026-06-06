@@ -76,7 +76,7 @@ export default function YourHome() {
             <Sparkles className="w-3 h-3" />
             Welcome Back to Global Wealth
           </div>
-          <h1 className="text-5xl md:text-6xl font-extrabold text-[#0d1f3d] tracking-tighter">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-[#0d1f3d] tracking-tighter">
             Hello, <span className="text-indigo-600">{user?.name}</span>
           </h1>
           <p className="text-xl text-slate-500 max-w-2xl leading-relaxed">
@@ -103,7 +103,7 @@ export default function YourHome() {
                 Connect your accounts and our AI will automatically scan for high-risk assets and tax optimization opportunities across your global investments.
               </p>
             </div>
-            <button className="px-10 py-5 bg-white text-[#0d1f3d] font-bold rounded-2xl hover:bg-slate-100 transition-all shadow-xl active:scale-95 whitespace-nowrap">
+          <button className="shrink-0 px-8 sm:px-10 py-4 sm:py-5 bg-white text-[#0d1f3d] font-bold rounded-2xl hover:bg-slate-100 transition-all shadow-xl active:scale-95 whitespace-nowrap">
               Connect Portfolios
             </button>
           </div>

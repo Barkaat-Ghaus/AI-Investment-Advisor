@@ -33,63 +33,85 @@ const BOTTOM_ITEMS = [
   },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen, onClose }) {
   const { pathname } = useLocation();
 
   return (
-    <aside
-      className="fixed top-0 left-0 bottom-0 flex flex-col bg-[#0d1f3d] z-50 shrink-0"
-      style={{ width: SIDEBAR_W }}
-    >
-      {/* Logo */}
-      <div className="px-5 pt-6 pb-7">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8.5 h-8.5 rounded-lg flex items-center justify-center shrink-0 bg-gradient-to-br from-[#2a6a3f] to-[#3d9e5f]">
-            <svg width="16" height="16" fill="none" stroke="white" strokeWidth="2.2" viewBox="0 0 24 24">
-              <path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/>
-            </svg>
-          </div>
-          <div>
-            <div className="text-white font-bold text-[13.5px] leading-tight">Global Wealth</div>
-            <div className="text-white/40 text-[9.5px] tracking-[0.07em] font-medium">AI Investment Advisor</div>
-          </div>
-        </div>
-      </div>
+    <>
+      {/* Mobile overlay backdrop */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={onClose}
+        />
+      )}
 
-      {/* Nav */}
-      <nav className="flex-1 flex flex-col gap-0.5 px-3">
-        {NAV_ITEMS.map((item) => {
-          const active = pathname === item.path;
-          return (
-            <Link key={item.label} to={item.path} className="no-underline">
-              <div
-                className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-[9px] text-[13px] cursor-pointer transition-all duration-150
-                  ${active
-                    ? 'bg-white/[0.07] text-white font-semibold border-l-[3px] border-[#3d9e5f]'
-                    : 'text-white/50 font-normal border-l-[3px] border-transparent hover:text-white/80'
-                  }`}
-              >
-                <span className="shrink-0 flex">{item.icon}</span>
-                <span>{item.label}</span>
-              </div>
-            </Link>
-          );
-        })}
-      </nav>
-
-      {/* Bottom */}
-      <div className="px-3 pb-6">
-        <div className="h-px bg-white/8 my-2" />
-        {BOTTOM_ITEMS.map((item) => (
-          <div
-            key={item.label}
-            className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-[9px] text-white/40 text-[13px] cursor-pointer transition-colors duration-150 hover:text-white/75"
+      <aside
+        className={`fixed top-0 left-0 bottom-0 flex flex-col bg-[#0d1f3d] z-50 shrink-0 transition-transform duration-300
+          lg:translate-x-0
+          ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
+        style={{ width: SIDEBAR_W }}
+      >
+        {/* Logo + Close button row */}
+        <div className="px-5 pt-6 pb-7 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-gradient-to-br from-[#2a6a3f] to-[#3d9e5f]">
+              <svg width="16" height="16" fill="none" stroke="white" strokeWidth="2.2" viewBox="0 0 24 24">
+                <path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/>
+              </svg>
+            </div>
+            <div>
+              <div className="text-white font-bold text-[13.5px] leading-tight">Global Wealth</div>
+              <div className="text-white/40 text-[9.5px] tracking-[0.07em] font-medium">AI Investment Advisor</div>
+            </div>
+          </div>
+          {/* Close button – only visible on mobile */}
+          <button
+            onClick={onClose}
+            className="lg:hidden text-white/40 hover:text-white/80 transition-colors p-1"
+            aria-label="Close sidebar"
           >
-            <span className="shrink-0 flex">{item.icon}</span>
-            <span>{item.label}</span>
-          </div>
-        ))}
-      </div>
-    </aside>
+            <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        {/* Nav */}
+        <nav className="flex-1 flex flex-col gap-0.5 px-3">
+          {NAV_ITEMS.map((item) => {
+            const active = pathname === item.path;
+            return (
+              <Link key={item.label} to={item.path} className="no-underline" onClick={onClose}>
+                <div
+                  className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-[9px] text-[13px] cursor-pointer transition-all duration-150
+                    ${active
+                      ? 'bg-white/[0.07] text-white font-semibold border-l-[3px] border-[#3d9e5f]'
+                      : 'text-white/50 font-normal border-l-[3px] border-transparent hover:text-white/80'
+                    }`}
+                >
+                  <span className="shrink-0 flex">{item.icon}</span>
+                  <span>{item.label}</span>
+                </div>
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Bottom */}
+        <div className="px-3 pb-6">
+          <div className="h-px bg-white/8 my-2" />
+          {BOTTOM_ITEMS.map((item) => (
+            <div
+              key={item.label}
+              className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-[9px] text-white/40 text-[13px] cursor-pointer transition-colors duration-150 hover:text-white/75"
+            >
+              <span className="shrink-0 flex">{item.icon}</span>
+              <span>{item.label}</span>
+            </div>
+          ))}
+        </div>
+      </aside>
+    </>
   );
 }

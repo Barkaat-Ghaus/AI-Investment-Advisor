@@ -125,7 +125,7 @@ export default function FinanceGoal() {
           <div className="inline-flex p-4 bg-indigo-100 rounded-3xl mb-4 group hover:scale-110 transition-transform cursor-pointer">
             <Sparkles className="w-10 h-10 text-indigo-600 animate-pulse" />
           </div>
-          <h1 className="text-5xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight">
             Hello! Let's map your <span className="text-indigo-600">financial destiny.</span>
           </h1>
           <p className="text-slate-500 text-xl leading-relaxed">
@@ -133,7 +133,7 @@ export default function FinanceGoal() {
           </p>
           <button 
             onClick={handleNext}
-            className=" flex text-center items-center gap-3 bg-[#0d1f3d] text-white px-10 py-5 rounded-2xl font-bold text-lg hover:bg-indigo-600 transition-all shadow-xl hover:shadow-indigo-200"
+            className="inline-flex items-center gap-3 bg-[#0d1f3d] text-white px-8 sm:px-10 py-4 sm:py-5 rounded-2xl font-bold text-lg hover:bg-indigo-600 transition-all shadow-xl hover:shadow-indigo-200"
           >
             Start Goal Assessment
             <ChevronRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
@@ -250,7 +250,7 @@ export default function FinanceGoal() {
 
           {/* AI Strategic Insights */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 bg-[#0d1f3d] rounded-[3rem] p-12 text-white shadow-2xl relative overflow-hidden group border border-white/5">
+            <div className="lg:col-span-2 bg-[#0d1f3d] rounded-[2rem] sm:rounded-[3rem] p-8 sm:p-12 text-white shadow-2xl relative overflow-hidden group border border-white/5">
               <div className="absolute -top-24 -right-24 p-10 opacity-5 group-hover:scale-110 transition-transform duration-1000 rotate-12">
                 <Target className="w-96 h-96" />
               </div>

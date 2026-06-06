@@ -6,11 +6,11 @@ export default function Home() {
 
   if (isAuthenticated && user) {
     return (
-      <div className="min-h-screen flex flex-col bg-slate-50 p-8">
+      <div className="min-h-screen flex flex-col bg-slate-50 p-4 sm:p-6 md:p-8">
         {/* Welcome Section */}
         <div className="max-w-3xl mx-auto w-full mb-8">
-          <div className="bg-gradient-to-r from-[#0d1f3d] to-[#1a2f4d] rounded-2xl p-8 text-white shadow-lg">
-            <h1 className="text-3xl font-bold mb-2">Welcome back, {user.name}!</h1>
+          <div className="bg-gradient-to-r from-[#0d1f3d] to-[#1a2f4d] rounded-2xl p-6 sm:p-8 text-white shadow-lg">
+            <h1 className="text-2xl sm:text-3xl font-bold mb-2">Welcome back, {user.name}!</h1>
             <p className="text-slate-200 text-base">You're logged in and ready to start investing smarter.</p>
           </div>
         </div>
@@ -28,7 +28,7 @@ export default function Home() {
               </Link>
             </div>
             
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="border-l-4 border-[#2a6a3f] pl-4">
                 <p className="text-sm text-slate-500 mb-1">Full Name</p>
                 <p className="text-lg font-semibold text-slate-800">{user.name}</p>

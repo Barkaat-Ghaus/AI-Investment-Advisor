@@ -88,7 +88,7 @@ function AssetRiskCard({ asset, data }) {
       </div>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-3 divide-x divide-slate-200 p-6 bg-slate-50 border-b border-slate-200">
+      <div className="grid grid-cols-3 divide-x divide-slate-200 p-4 sm:p-6 bg-slate-50 border-b border-slate-200">
         <div className="text-center">
           <p className="text-xs text-slate-500 font-medium mb-2">Volatility</p>
           <p className="text-2xl font-bold text-slate-900">{data.volatility}</p>
@@ -215,10 +215,10 @@ export default function RiskAnalysis() {
               <Gauge className="w-6 h-6 text-rose-600" />
             </div>
             <div>
-              <h1 className="text-4xl font-light text-slate-800 tracking-tight">
+              <h1 className="text-3xl sm:text-4xl font-light text-slate-800 tracking-tight">
                 Asset Risk <span className="font-bold">Predictions</span>
               </h1>
-              <p className="text-slate-500 text-lg mt-1">Real-time risk assessments from Previous 5 year data & AI analysis</p>
+              <p className="text-slate-500 text-base sm:text-lg mt-1">Real-time risk assessments from Previous 5 year data &amp; AI analysis</p>
             </div>
           </div>
 

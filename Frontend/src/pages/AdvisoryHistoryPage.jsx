@@ -15,7 +15,7 @@ export default function AdvisoryHistoryPage() {
 
   return (
     <>
-      <main className="flex-1 px-10 pt-9 pb-16 max-w-7xl">
+      <main className="flex-1 px-4 sm:px-6 lg:px-10 pt-6 sm:pt-9 pb-16 max-w-7xl">
         {/* Page header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
@@ -37,7 +37,7 @@ export default function AdvisoryHistoryPage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-200 bg-white px-10 py-3.5 flex justify-between items-center flex-wrap gap-2">
+      <footer className="border-t border-slate-200 bg-white px-4 sm:px-10 py-3.5 flex justify-between items-center flex-wrap gap-2">
         <span className="text-[11px] text-slate-400 font-medium tracking-[0.06em] uppercase">
           Global Wealth Management © 2025
         </span>

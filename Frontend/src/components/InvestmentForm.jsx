@@ -444,7 +444,7 @@ export default function InvestmentForm({ values: ext, onChange, onCalculate }) {
       <div style={{ padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 18 }}>
 
         {/* Row 1: Income / Investment */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
           <Controller name="income" control={control}
             rules={{ required: 'Required', min: { value: 1, message: 'Must be > 0' } }}
             render={({ field }) => <MoneyInput id="income" label="Monthly Income" field={field} error={errors.income} />}
@@ -473,7 +473,7 @@ export default function InvestmentForm({ values: ext, onChange, onCalculate }) {
         />
 
         {/* Row 4: Goals + Chart */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 12 }}>
 
           <Controller name="goal" control={control}
             render={({ field }) => <GoalList field={field} />}

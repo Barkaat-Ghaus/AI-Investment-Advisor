@@ -6,7 +6,7 @@ const AuthNav = () => {
   const isLogin = location.pathname === '/login';
 
   return (
-    <nav className="w-full px-8 py-5 flex items-center justify-between border-b border-slate-200/60 bg-white/50 backdrop-blur-md sticky top-0 z-50">
+    <nav className="w-full px-4 sm:px-8 py-5 flex items-center justify-between border-b border-slate-200/60 bg-white/50 backdrop-blur-md sticky top-0 z-50">
       <Link to="/" className="flex items-center gap-2.5 group">
         <div className="w-9 h-9 bg-slate-800 rounded-xl flex items-center justify-center text-white font-bold text-lg group-hover:bg-slate-700 transition-colors shadow-sm">
           D

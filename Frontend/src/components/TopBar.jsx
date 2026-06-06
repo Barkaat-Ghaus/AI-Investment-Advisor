@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { SIDEBAR_W } from './Sidebar';
 import useAuthStore from '../store/store';
 
 const TABS = [
@@ -12,7 +11,7 @@ const TABS = [
   { label: 'Profile',      path: '/profile'    },
 ];
 
-export default function TopBar() {
+export default function TopBar({ onMenuToggle }) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { isAuthenticated, user, logout } = useAuthStore();
@@ -23,21 +22,34 @@ export default function TopBar() {
   };
 
   return (
-    <header className="sticky top-0 z-40 flex items-center bg-white border-b border-slate-200 h-[60px] px-8 gap-0">
+    <header className="sticky top-0 z-40 flex items-center bg-white border-b border-slate-200 h-[60px] px-4 sm:px-6 gap-0">
+
+      {/* Hamburger – visible only on mobile (<lg) */}
+      <button
+        onClick={onMenuToggle}
+        className="lg:hidden mr-3 p-1.5 text-slate-500 hover:text-slate-800 bg-transparent border-none cursor-pointer flex items-center"
+        aria-label="Open navigation"
+      >
+        <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
 
       {/* App title */}
-      <span className="text-[14px] font-bold text-[#0d1f3d] mr-8 shrink-0 whitespace-nowrap">
+      <span className="text-[14px] font-bold text-[#0d1f3d] mr-4 sm:mr-8 shrink-0 whitespace-nowrap">
         AI Investment Advisor
       </span>
 
-      {/* Tabs */}
-      <nav className="flex items-stretch flex-1 gap-0">
+      {/* Tabs – hidden on small screens, shown from md up */}
+      <nav className="hidden md:flex items-stretch flex-1 gap-0 overflow-x-auto">
         {TABS.map((tab) => {
           const active = pathname === tab.path;
           return (
             <Link key={tab.label} to={tab.path} className="no-underline">
               <button
-                className={`h-[60px] px-4 text-[13px] bg-transparent border-none cursor-pointer whitespace-nowrap flex items-center transition-colors duration-150
+                className={`h-[60px] px-3 lg:px-4 text-[12px] lg:text-[13px] bg-transparent border-none cursor-pointer whitespace-nowrap flex items-center transition-colors duration-150
                   border-b-2 border-t-2 border-t-transparent
                   ${active
                     ? 'font-semibold text-[#0d1f3d] border-b-[#0d1f3d]'
@@ -51,8 +63,11 @@ export default function TopBar() {
         })}
       </nav>
 
+      {/* Spacer for mobile (pushes right actions to right) */}
+      <div className="flex-1 md:hidden" />
+
       {/* Right actions */}
-      <div className="flex items-center gap-4 ml-6 shrink-0">
+      <div className="flex items-center gap-2 sm:gap-4 ml-2 sm:ml-6 shrink-0">
         {isAuthenticated ? (
           <>
             {/* Bell */}
@@ -73,7 +88,7 @@ export default function TopBar() {
 
             <button
               onClick={handleLogout}
-              className="bg-transparent border-none cursor-pointer text-[13px] font-semibold text-slate-500 hover:text-slate-700 transition-colors"
+              className="hidden sm:block bg-transparent border-none cursor-pointer text-[13px] font-semibold text-slate-500 hover:text-slate-700 transition-colors"
             >
               Log out
             </button>
@@ -81,12 +96,12 @@ export default function TopBar() {
         ) : (
           <>
             <Link to="/login" className="no-underline">
-              <button className="bg-transparent border-none text-[#0d1f3d] text-[14px] font-semibold cursor-pointer px-4 py-2 hover:text-slate-600 transition-colors">
+              <button className="bg-transparent border-none text-[#0d1f3d] text-[13px] sm:text-[14px] font-semibold cursor-pointer px-3 sm:px-4 py-2 hover:text-slate-600 transition-colors">
                 Log in
               </button>
             </Link>
             <Link to="/signup" className="no-underline">
-              <button className="bg-[#0d1f3d] text-white border-none rounded-lg text-[14px] font-semibold cursor-pointer px-4 py-2 shadow-md hover:opacity-90 transition-opacity">
+              <button className="bg-[#0d1f3d] text-white border-none rounded-lg text-[13px] sm:text-[14px] font-semibold cursor-pointer px-3 sm:px-4 py-2 shadow-md hover:opacity-90 transition-opacity">
                 Sign up
               </button>
             </Link>

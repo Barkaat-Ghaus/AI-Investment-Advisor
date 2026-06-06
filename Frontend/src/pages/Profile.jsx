@@ -42,9 +42,9 @@ export default function Profile() {
   }, [memoizedFetchProfile]);
 
   return (
-    <main className="flex-1 p-8 max-w-5xl mx-auto w-full">
+    <main className="flex-1 p-4 sm:p-6 md:p-8 max-w-5xl mx-auto w-full">
       {/* Header Profile Section */}
-      <div className="anim-fade-up relative overflow-hidden bg-[#0d1f3d] rounded-4xl p-10 mb-8 border border-white/5">
+      <div className="anim-fade-up relative overflow-hidden bg-[#0d1f3d] rounded-3xl sm:rounded-[3rem] p-6 sm:p-8 md:p-10 mb-8 border border-white/5">
         {/* Abstract background blobs */}
         <div className="absolute top-[-20%] right-[-10%] w-75 h-75 bg-[#2a6a3f]/20 rounded-full blur-3xl" />
         <div className="absolute bottom-[-20%] left-[-10%] w-62.5 h-62.5 bg-blue-500/10 rounded-full blur-2xl" />
