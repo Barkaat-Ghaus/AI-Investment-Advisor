@@ -97,19 +97,24 @@ function PortfolioReport({ values, calculated, regionalData, aiAllocation, loadi
   const allocation     = aiAllocation || getFallbackAllocation(risk);
   const isAIAllocation = !!aiAllocation;
 
-  // Calculate projected values
-  const calculateProjection = (amount, rate, years) => {
-    const r = parseFloat(rate) / 100;
-    return amount * Math.pow(1 + r, years);
+  // Calculate projected values using SIP (monthly investment) formula:
+  // FV = P × [((1 + r)^n − 1) / r] × (1 + r)
+  // where P = monthly amount allocated to asset, r = monthly rate, n = total months
+  const calculateSIPProjection = (monthlyAmount, annualRatePct, years) => {
+    const r = parseFloat(annualRatePct) / 100 / 12; // monthly rate
+    const n = years * 12;                            // total months
+    if (r === 0) return monthlyAmount * n;
+    return monthlyAmount * (((Math.pow(1 + r, n) - 1) / r) * (1 + r));
   };
 
+  const totalInvested  = investment * duration * 12; // total capital deployed
   const totalProjected = Object.entries(allocation).reduce((acc, [asset, pct]) => {
-    const assetAmount = (investment * pct) / 100;
+    const monthlyAssetAmount = (investment * pct) / 100;
     const rate = regionalData[asset]?.expectedReturn ?? '0';
-    return acc + calculateProjection(assetAmount, rate, duration);
+    return acc + calculateSIPProjection(monthlyAssetAmount, rate, duration);
   }, 0);
 
-  const totalReturn    = ((totalProjected - investment) / investment) * 100;
+  const totalReturn    = totalInvested > 0 ? ((totalProjected - totalInvested) / totalInvested) * 100 : 0;
   const volatilityInfo = deriveVolatilityInfo(allocation);
 
   // Format pct for display — round to 1 decimal, strip trailing .0
@@ -165,6 +170,9 @@ function PortfolioReport({ values, calculated, regionalData, aiAllocation, loadi
                   </span>
                   <span className="text-slate-400 text-xs font-medium">Over {duration} years</span>
                 </div>
+                <p className="text-xs text-slate-400 mt-1">
+                  Total invested: ₹{totalInvested.toLocaleString()} (₹{investment.toLocaleString()}/mo × {duration * 12} months)
+                </p>
               </div>
               <div className="h-24 w-full md:w-64 bg-slate-50 rounded-xl border border-dashed border-slate-300 flex items-center justify-center p-4">
                 <div className="text-center">

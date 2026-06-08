@@ -22,20 +22,18 @@ import {
 function ActionCard({ icon: Icon, label, sub, path, gradient, glowColor }) {
   return (
     <Link to={path} className="no-underline group">
-      <div 
+      <div
         className="relative bg-white rounded-2xl border border-slate-100 p-5 shadow-sm
           hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col h-full"
       >
-        {/* Glow effect on hover */}
-        <div 
+        {/* Glow effect on hover — radial-gradient with dynamic colour, must stay inline */}
+        <div
           className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-          style={{
-            background: `radial-gradient(circle at top right, ${glowColor}15, transparent 70%)`
-          }}
+          style={{ background: `radial-gradient(circle at top right, ${glowColor}15, transparent 70%)` }}
         />
 
-        {/* Icon wrapper with custom gradient */}
-        <div 
+        {/* Icon wrapper — gradient is a dynamic JS string prop, must stay inline */}
+        <div
           className="inline-flex w-11 h-11 rounded-xl items-center justify-center mb-4 text-white shadow-md transition-transform duration-300 group-hover:scale-110"
           style={{ background: gradient }}
         >
@@ -47,7 +45,7 @@ function ActionCard({ icon: Icon, label, sub, path, gradient, glowColor }) {
         </h3>
         <p className="text-[11.5px] text-slate-400 leading-relaxed flex-1">{sub}</p>
 
-        <div className="mt-4 flex items-center gap-1 text-[11px] font-bold text-indigo-600 opacity-0 group-hover:opacity-100 translate-x-[-4px] group-hover:translate-x-0 transition-all duration-300">
+        <div className="mt-4 flex items-center gap-1 text-[11px] font-bold text-indigo-600 opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0 transition-all duration-300">
           Open module <ChevronRight size={11} />
         </div>
       </div>
@@ -59,7 +57,8 @@ function ActionCard({ icon: Icon, label, sub, path, gradient, glowColor }) {
 function StatCard({ label, value, sub, icon: Icon, gradient, textColor }) {
   return (
     <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm hover:shadow-md transition-all duration-300 flex items-start gap-4">
-      <div 
+      {/* gradient is a dynamic JS string prop, must stay inline */}
+      <div
         className="w-11 h-11 shrink-0 rounded-xl flex items-center justify-center text-white shadow-sm"
         style={{ background: gradient }}
       >

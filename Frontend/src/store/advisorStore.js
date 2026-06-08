@@ -32,7 +32,7 @@ const useAdvisorStore = create((set, get) => ({
 
     // ── 1. Fetch AI insights (existing) ──────────────────────────────
     try {
-      const message = `Generate exactly 5 bullet points (separated by '|') of direct investment advice, each between 20 and 60 words, for an investor with ₹${values.income} monthly income, investing ₹${values.investment}, duration ${values.duration} years, ${values.risk} risk tolerance. Do not include introductory text, markdown, or numbers. Just the 5 points separated by '|'.`;
+      const message = `Generate exactly 5 bullet points (separated by '|') of direct investment advice, each between 20 and 60 words, for an investor with ₹${values.income} monthly income, making a monthly SIP investment of ₹${values.investment}, duration ${values.duration} years, ${values.risk} risk tolerance. Do not include introductory text, markdown, or numbers. Just the 5 points separated by '|'.`;
 
       const headers = { "Content-Type": "application/json" };
       if (token) headers["Authorization"] = `Bearer ${token}`;

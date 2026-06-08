@@ -130,8 +130,7 @@ const Login = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className={`w-full py-3 px-4 flex justify-center text-sm font-semibold rounded-xl text-white ${isLoading ? 'opacity-70 cursor-not-allowed bg-slate-600' : 'active:scale-[0.98]'} transition-all duration-200 shadow-sm`}
-              style={isLoading ? {} : { background: '#0d1f3d' }}
+              className={`w-full py-3 px-4 flex justify-center text-sm font-semibold rounded-xl text-white ${isLoading ? 'opacity-70 cursor-not-allowed bg-slate-600' : 'bg-[#0d1f3d] active:scale-[0.98]'} transition-all duration-200 shadow-sm`}
             >
               {isLoading ? (
                 <span className="flex items-center">

@@ -28,24 +28,18 @@ export default function MarketTable() {
   };
 
   return (
-    <section style={{ marginTop: 40 }}>
+    <section className="mt-10">
       {/* Header */}
-      <div style={{ marginBottom: 18 }}>
-        <div style={{ fontSize: 10.5, fontWeight: 700, color: '#2a6a3f', letterSpacing: '0.12em', marginBottom: 6 }}>
+      <div className="mb-[18px]">
+        <div className="text-[10.5px] font-bold text-[#2a6a3f] tracking-[0.12em] mb-1.5">
           REAL-TIME DATA
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <h2 style={{ fontSize: 22, fontWeight: 800, color: '#0d1f3d', letterSpacing: '-0.02em' }}>
+        <div className="flex items-center justify-between">
+          <h2 className="text-[22px] font-extrabold text-[#0d1f3d] tracking-tight">
             Market Trends: Top Performing Stocks
           </h2>
-          <button style={{
-            background: 'none', border: 'none', cursor: 'pointer',
-            fontSize: 13, color: '#2a6a3f', fontWeight: 600,
-            display: 'flex', alignItems: 'center', gap: 4,
-            transition: 'opacity 0.2s',
-          }}
-          onMouseEnter={e => e.currentTarget.style.opacity = '0.7'}
-          onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+          <button
+            className="flex items-center gap-1 text-[13px] font-semibold text-[#2a6a3f] bg-transparent border-none cursor-pointer transition-opacity hover:opacity-70"
           >
             View Full Exchange
             <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -56,25 +50,13 @@ export default function MarketTable() {
       </div>
 
       {/* Table */}
-      <div style={{
-        background: '#ffffff',
-        borderRadius: 16,
-        border: '1px solid #e2e8f0',
-        overflow: 'hidden',
-        boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
-      }}>
+      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.05)]">
         {/* Table Head */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '100px 1fr 140px 130px 160px',
-          padding: '12px 24px',
-          borderBottom: '1px solid #f1f5f9',
-        }}>
+        <div className="grid grid-cols-[100px_1fr_140px_130px_160px] px-6 py-3 border-b border-slate-100">
           {['SYMBOL', 'ASSET NAME', 'CURRENT PRICE', '24H CHANGE', 'ACTION'].map((h) => (
-            <div key={h} style={{
-              fontSize: 10.5, fontWeight: 600,
-              color: '#94a3b8', letterSpacing: '0.08em',
-            }}>{h}</div>
+            <div key={h} className="text-[10.5px] font-semibold text-slate-400 tracking-[0.08em]">
+              {h}
+            </div>
           ))}
         </div>
 
@@ -84,49 +66,32 @@ export default function MarketTable() {
           return (
             <div
               key={stock.symbol}
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '100px 1fr 140px 130px 160px',
-                padding: '16px 24px',
-                alignItems: 'center',
-                borderBottom: i < STOCKS.length - 1 ? '1px solid #f8fafc' : 'none',
-                transition: 'background 0.15s',
-              }}
-              onMouseEnter={e => e.currentTarget.style.background = '#fafbfc'}
-              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+              className={`grid grid-cols-[100px_1fr_140px_130px_160px] px-6 py-4 items-center transition-colors hover:bg-[#fafbfc] ${
+                i < STOCKS.length - 1 ? 'border-b border-[#f8fafc]' : ''
+              }`}
             >
-              {/* Symbol Badge */}
+              {/* Symbol Badge — color is runtime-dynamic, must stay inline */}
               <div>
-                <span style={{
-                  display: 'inline-block',
-                  padding: '5px 10px',
-                  borderRadius: 6,
-                  background: SYMBOL_COLORS[stock.symbol] || '#0d1f3d',
-                  color: '#ffffff',
-                  fontSize: 11.5,
-                  fontWeight: 700,
-                  letterSpacing: '0.04em',
-                }}>
+                <span
+                  className="inline-block px-[10px] py-[5px] rounded-[6px] text-white text-[11.5px] font-bold tracking-[0.04em]"
+                  style={{ background: SYMBOL_COLORS[stock.symbol] || '#0d1f3d' }}
+                >
                   {stock.symbol}
                 </span>
               </div>
 
               {/* Asset Name */}
-              <div style={{ fontSize: 13.5, fontWeight: 500, color: '#0d1f3d' }}>
+              <div className="text-[13.5px] font-medium text-[#0d1f3d]">
                 {stock.name}
               </div>
 
               {/* Price */}
-              <div style={{ fontSize: 13.5, fontWeight: 600, color: '#0d1f3d' }}>
+              <div className="text-[13.5px] font-semibold text-[#0d1f3d]">
                 {stock.price}
               </div>
 
               {/* Change */}
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: 5,
-                fontSize: 13, fontWeight: 600,
-                color: stock.positive ? '#16a34a' : '#dc2626',
-              }}>
+              <div className={`flex items-center gap-[5px] text-[13px] font-semibold ${stock.positive ? 'text-green-600' : 'text-red-600'}`}>
                 <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                   {stock.positive
                     ? <><line x1="7" y1="17" x2="17" y2="7" /><polyline points="7 7 17 7 17 17" /></>
@@ -140,20 +105,11 @@ export default function MarketTable() {
               <div>
                 <button
                   onClick={() => toggle(stock.symbol)}
-                  style={{
-                    padding: '7px 14px',
-                    fontSize: 12,
-                    fontWeight: 600,
-                    color: inWatchlist ? '#2a6a3f' : '#64748b',
-                    background: inWatchlist ? '#e8f5ee' : '#f8fafc',
-                    border: `1px solid ${inWatchlist ? '#b6dfc5' : '#e2e8f0'}`,
-                    borderRadius: 7,
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    whiteSpace: 'nowrap',
-                  }}
-                  onMouseEnter={e => !inWatchlist && (e.currentTarget.style.background = '#f1f5f9')}
-                  onMouseLeave={e => !inWatchlist && (e.currentTarget.style.background = '#f8fafc')}
+                  className={`px-[14px] py-[7px] text-[12px] font-semibold rounded-[7px] cursor-pointer transition-all whitespace-nowrap border ${
+                    inWatchlist
+                      ? 'text-[#2a6a3f] bg-[#e8f5ee] border-[#b6dfc5]'
+                      : 'text-slate-500 bg-[#f8fafc] border-slate-200 hover:bg-slate-100'
+                  }`}
                 >
                   {inWatchlist ? '✓ In Watchlist' : '+ Add to Watchlist'}
                 </button>

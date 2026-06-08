@@ -65,9 +65,8 @@ export default function Sidebar({ isOpen, onClose }) {
       )}
 
       <aside
-        style={{ width: SIDEBAR_W }}
         className={`
-          fixed top-0 left-0 bottom-0 z-50 flex flex-col
+          w-60 fixed top-0 left-0 bottom-0 z-50 flex flex-col
           bg-[#090d16] border-r border-white/[0.05]
           transition-transform duration-300 ease-in-out
           lg:translate-x-0

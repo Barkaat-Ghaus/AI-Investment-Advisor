@@ -233,9 +233,7 @@ function DurationSlider({ field }) {
   );
 }
 
-/* ══════════════════════════════════════════════════════════════
-   RISK SELECTOR — monochromatic, no color-coding
-══════════════════════════════════════════════════════════════ */
+
 function RiskSelector({ field }) {
   const { value, onChange } = field;
   const active = RISK_OPTIONS.find(o => o.value === value);
@@ -451,7 +449,7 @@ export default function InvestmentForm({ values: ext, onChange, onCalculate }) {
           />
           <Controller name="investment" control={control}
             rules={{ required: 'Required', min: { value: 100, message: 'Min ₹100' } }}
-            render={({ field }) => <MoneyInput id="investment" label="Investment Amount" field={field} error={errors.investment} />}
+            render={({ field }) => <MoneyInput id="investment" label="Monthly Investment Amount" field={field} error={errors.investment} />}
           />
         </div>
 
