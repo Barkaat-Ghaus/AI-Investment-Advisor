@@ -207,7 +207,7 @@ export default function LandingPage() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
-        .landing-root * { box-sizing: border-box; margin: 0; padding: 0; }
+        .landing-root * { box-sizing: border-box; }
         .landing-root { font-family: 'Inter', sans-serif; }
 
         .landing-card:hover { transform: translateY(-6px); box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
@@ -303,7 +303,8 @@ export default function LandingPage() {
       <div className="landing-root min-h-screen bg-[#060b18] text-[#f1f5f9] overflow-x-hidden">
 
         {/* ── Nav ─────────────────────────────────────────────── */}
-        <nav className="nav-glass sticky top-0 z-50 h-16 flex items-center justify-between px-8">
+        <nav className="nav-glass sticky top-0 z-50 h-16">
+          <div className="max-w-[1100px] mx-auto h-full flex items-center justify-between px-6 md:px-10">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-[10px] flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.4)]"
               style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }}>
@@ -331,6 +332,7 @@ export default function LandingPage() {
               </button>
             </Link>
           </div>
+          </div>
         </nav>
 
         {/* ── Ticker bar ──────────────────────────────────────── */}
@@ -347,7 +349,7 @@ export default function LandingPage() {
         </div>
 
         {/* ── Hero ─────────────────────────────────────────────── */}
-        <section className="relative pt-[100px] pb-[80px] px-6 max-w-[1100px] mx-auto text-center overflow-hidden">
+        <section className="relative pt-[72px] pb-[64px] px-6 md:px-10 max-w-[1100px] mx-auto text-center overflow-hidden">
           {/* Particle canvas */}
           <div className="absolute inset-[-100px] overflow-hidden">
             <ParticleCanvas />
@@ -407,7 +409,7 @@ export default function LandingPage() {
         </section>
 
         {/* ── Stats ────────────────────────────────────────────── */}
-        <section className="px-6 pb-[80px] max-w-[1100px] mx-auto">
+        <section className="px-6 md:px-10 pb-[64px] max-w-[1100px] mx-auto">
           <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-4">
             {STATS.map((s) => (
               <div key={s.label} className="stat-card">
@@ -421,7 +423,7 @@ export default function LandingPage() {
         </section>
 
         {/* ── Feature cards ────────────────────────────────────── */}
-        <section className="px-6 pb-[80px] max-w-[1100px] mx-auto">
+        <section className="px-6 md:px-10 pb-[64px] max-w-[1100px] mx-auto">
           <div className="text-center mb-12">
             <p className="text-[11px] font-bold text-indigo-500 tracking-[0.14em] uppercase mb-2.5">
               Platform Modules
@@ -438,7 +440,7 @@ export default function LandingPage() {
         </section>
 
         {/* ── Dark CTA ─────────────────────────────────────────── */}
-        <section className="px-6 pb-[80px] max-w-[1100px] mx-auto">
+        <section className="px-6 md:px-10 pb-[64px] max-w-[1100px] mx-auto">
           <div className="relative rounded-[28px] text-center overflow-hidden
             border border-white/[0.06] shadow-[0_40px_100px_rgba(0,0,0,0.5)]"
             style={{ background: 'linear-gradient(135deg, #0f0c29, #302b63, #24243e)', padding: 'clamp(40px,8vw,72px)' }}>
@@ -473,7 +475,8 @@ export default function LandingPage() {
         </section>
 
         {/* ── Footer ───────────────────────────────────────────── */}
-        <footer className="border-t border-white/[0.05] py-5 px-8 flex flex-wrap justify-between items-center gap-3">
+        <footer className="border-t border-white/[0.05] py-5">
+          <div className="max-w-[1100px] mx-auto px-6 md:px-10 flex flex-wrap justify-between items-center gap-3">
           <div className="flex items-center gap-2">
             <Globe size={13} color="rgba(148,163,184,0.4)" />
             <span className="text-[11px] text-slate-400/40 font-medium tracking-[0.05em] uppercase">
@@ -489,6 +492,7 @@ export default function LandingPage() {
                 {l}
               </button>
             ))}
+          </div>
           </div>
         </footer>
       </div>

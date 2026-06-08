@@ -11,7 +11,8 @@ import {
   Info,
   DollarSign,
   TrendingDown,
-  Activity
+  Activity,
+  AlertCircle
 } from 'lucide-react';
 import useProfileStore from '../store/profileStore';
 import useAuthStore from '../store/store';
@@ -47,10 +48,11 @@ const QuestionCard = ({ title, subtitle, icon: Icon, children }) => (
 export default function ProfileQuestion() {
   const navigate = useNavigate();
   const { token, isAuthenticated } = useAuthStore();
-  const { saveProfile, fetchProfile, profile, loading } = useProfileStore();
+  const { saveProfile, fetchProfile, profile, loading, error } = useProfileStore();
   
   const [step, setStep] = useState(0);
   const [profileExists, setProfileExists] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
   const [formData, setFormData] = useState({
     monthly_income: '',
     investment_capital: '',
@@ -90,9 +92,10 @@ export default function ProfileQuestion() {
   };
 
   const handleSubmit = async () => {
+    setSubmitError(null);
     // Validate that all fields are filled
     if (!formData.monthly_income || !formData.investment_capital) {
-      alert('Please fill in all required fields');
+      setSubmitError('Please fill in all required fields before continuing.');
       return;
     }
 
@@ -110,7 +113,7 @@ export default function ProfileQuestion() {
       await fetchProfile(token);
       navigate('/profile');
     } else {
-      alert('Error saving profile: ' + (result.message || 'Unknown error'));
+      setSubmitError(result.message || 'Something went wrong. Please try again.');
     }
   };
 
@@ -344,6 +347,14 @@ export default function ProfileQuestion() {
               )}
             </button>
           </div>
+
+          {/* Inline error banner — replaces browser alert() */}
+          {submitError && (
+            <div className="mt-4 flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
+              <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+              <p className="text-xs text-red-700 font-medium leading-relaxed">{submitError}</p>
+            </div>
+          )}
         </QuestionCard>
 
         <p className="mt-8 text-[11px] text-slate-400 font-bold uppercase tracking-[0.2em]">

@@ -1,13 +1,6 @@
 import { create } from 'zustand';
 import API_BASE_URL from '../config/api';
 
-// Safely parse JSON — guards against HTML error pages (e.g. Render cold-start)
-const safeJson = async (res) => {
-  const contentType = res.headers.get('content-type') || '';
-  if (contentType.includes('application/json')) return res.json();
-  return {};
-};
-
 const calculateTimeToGoal = (pv, p, fv, annualRate) => {
   const r = (parseFloat(annualRate) / 100) / 12;
   if (r <= 0) return (fv - pv) / (p * 12);
@@ -32,7 +25,7 @@ const useFinanceStore = create((set, get) => ({
     set({ isLoading: true });
     try {
       const res = await fetch(`${API_BASE_URL}/api/finance/top-performers`);
-      const data = await safeJson(res);
+      const data = await res.json();
       set({ 
         topStocksUs: data.us || [], 
         topStocksIndia: data.india || [],
@@ -76,7 +69,7 @@ const useFinanceStore = create((set, get) => ({
         body: JSON.stringify({ message: prompt })
       });
       
-      const data = await safeJson(res);
+      const data = await res.json();
       set({ 
         aiResponse: data.answer || "Maintain disciplined investing and prioritize high-growth assets to meet your timeline.",
       });

@@ -1,20 +1,6 @@
 import { create } from "zustand";
 import API_BASE_URL from '../config/api';
 
-// Safely parse JSON — guards against HTML error pages (e.g. Render cold-start wake-up pages)
-const safeJson = async (res) => {
-  const contentType = res.headers.get('content-type') || '';
-  if (contentType.includes('application/json')) {
-    return res.json();
-  }
-  // Non-JSON body (HTML error page, plain text, etc.)
-  const text = await res.text();
-  if (res.status === 503 || res.status === 502) {
-    return { message: 'The server is starting up, please try again in a few seconds.' };
-  }
-  return { message: text.slice(0, 200) || `Server error (${res.status})` };
-};
-
 const useProfileStore = create((set, get) => ({
   profile: null,
   loading: false,
@@ -29,16 +15,22 @@ const useProfileStore = create((set, get) => ({
         }
       });
       if (res.ok) {
-        const data = await safeJson(res);
+        const data = await res.json();
         set({ profile: data, error: null });
       } else if (res.status === 404) {
         set({ profile: null, error: null });
       } else {
-        const errorData = await safeJson(res);
-        set({ profile: null, error: errorData.message });
+        // Safely parse — server might return HTML on cold-start or proxy errors
+        const contentType = res.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          const errorData = await res.json();
+          set({ profile: null, error: errorData.message });
+        } else {
+          set({ profile: null, error: `Server error (${res.status}). Please try again.` });
+        }
       }
     } catch (err) {
-      set({ error: err.message, profile: null });
+      set({ error: 'Unable to reach the server. Check your connection.', profile: null });
     } finally {
       set({ loading: false });
     }
@@ -55,7 +47,18 @@ const useProfileStore = create((set, get) => ({
         },
         body: JSON.stringify(profileData)
       });
-      const data = await safeJson(res);
+
+      // Safely parse — avoid showing raw HTML from Netlify/Render proxy errors
+      const contentType = res.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        const msg = res.status === 404
+          ? 'API endpoint not found. The backend may be offline.'
+          : `Server returned an unexpected response (${res.status}). Please try again.`;
+        set({ error: msg });
+        return { success: false, message: msg };
+      }
+
+      const data = await res.json();
       if (res.ok) {
         const savedProfile = data.profile || data;
         set({ profile: savedProfile, error: null });
@@ -65,8 +68,9 @@ const useProfileStore = create((set, get) => ({
         return { success: false, message: data.message };
       }
     } catch (err) {
-      set({ error: err.message });
-      return { success: false, message: err.message };
+      const msg = 'Unable to reach the server. Please check your connection.';
+      set({ error: msg });
+      return { success: false, message: msg };
     } finally {
       set({ loading: false });
     }
