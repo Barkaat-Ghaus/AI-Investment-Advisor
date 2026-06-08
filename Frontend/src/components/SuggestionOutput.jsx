@@ -70,11 +70,11 @@ const SUGGESTIONS = {
 };
 
 const ASSET_META = [
-  { key: 'stocks',      label: 'Stocks',      icon: '📈', color: '#0d1f3d', light: '#e8ecf4', tag: 'Equities'       },
-  { key: 'bonds',       label: 'Bonds',       icon: '🏛️', color: '#2a6a3f', light: '#e8f5ee', tag: 'Fixed Income'   },
-  { key: 'gold',        label: 'Gold',        icon: '🥇', color: '#d97706', light: '#fef3c7', tag: 'Commodity'      },
-  { key: 'mutualFunds', label: 'Mutual Funds',icon: '💼', color: '#7c3aed', light: '#f3eeff', tag: 'Diversified'    },
-  { key: 'cash',        label: 'Cash / FD',   icon: '🏦', color: '#0891b2', light: '#e0f7fa', tag: 'Safe Haven'     },
+  { key: 'stocks',      label: 'Stocks',      icon: '📈', color: '#0d1f3d', light: '#e8ecf4', tag: 'Equities'     },
+  { key: 'bonds',       label: 'Bonds',       icon: '🏛️', color: '#2a6a3f', light: '#e8f5ee', tag: 'Fixed Income' },
+  { key: 'gold',        label: 'Gold',        icon: '🥇', color: '#d97706', light: '#fef3c7', tag: 'Commodity'    },
+  { key: 'mutualFunds', label: 'Mutual Funds',icon: '💼', color: '#7c3aed', light: '#f3eeff', tag: 'Diversified'  },
+  { key: 'cash',        label: 'Cash / FD',   icon: '🏦', color: '#0891b2', light: '#e0f7fa', tag: 'Safe Haven'   },
 ];
 
 /* ── Copy-to-clipboard hook ───────────────────────────────────── */
@@ -114,41 +114,30 @@ function AllocRow({ meta, pct, delay }) {
   }, [pct, delay]);
 
   return (
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: '28px 110px 1fr 52px',
-      alignItems: 'center',
-      gap: 10,
-      padding: '10px 0',
-      borderBottom: '1px solid #f1f5f9',
-    }}>
-      {/* Icon */}
-      <span style={{ fontSize: 16 }}>{meta.icon}</span>
+    <div className="grid grid-cols-[28px_110px_1fr_52px] items-center gap-2.5 py-2.5 border-b border-[#f1f5f9]">
+      <span className="text-[16px]">{meta.icon}</span>
 
-      {/* Label + tag */}
       <div>
-        <div style={{ fontSize: 13, fontWeight: 700, color: '#0d1f3d' }}>{meta.label}</div>
-        <div style={{ fontSize: 10, fontWeight: 600, color: meta.color, letterSpacing: '0.05em' }}>{meta.tag}</div>
+        <div className="text-[13px] font-bold text-[#0d1f3d]">{meta.label}</div>
+        {/* tag color is dynamic asset value */}
+        <div className="text-[10px] font-semibold tracking-[0.05em]" style={{ color: meta.color }}>{meta.tag}</div>
       </div>
 
-      {/* Bar */}
-      <div style={{ height: 8, borderRadius: 6, background: '#f1f5f9', overflow: 'hidden' }}>
-        <div style={{
-          height: '100%',
-          width: `${w}%`,
-          background: `linear-gradient(90deg, ${meta.color}cc, ${meta.color})`,
-          borderRadius: 6,
-          transition: 'width 0.9s cubic-bezier(0.34,1.56,0.64,1)',
-        }} />
+      {/* Bar track */}
+      <div className="h-2 rounded-[6px] bg-[#f1f5f9] overflow-hidden">
+        {/* Bar fill — width is animated JS state and color is dynamic */}
+        <div
+          className="h-full rounded-[6px]"
+          style={{
+            width: `${w}%`,
+            background: `linear-gradient(90deg, ${meta.color}cc, ${meta.color})`,
+            transition: 'width 0.9s cubic-bezier(0.34,1.56,0.64,1)',
+          }}
+        />
       </div>
 
-      {/* Percent badge */}
-      <div style={{
-        textAlign: 'right',
-        fontSize: 15,
-        fontWeight: 900,
-        color: meta.color,
-      }}>
+      {/* Percent badge — color is dynamic */}
+      <div className="text-right text-[15px] font-black" style={{ color: meta.color }}>
         <AnimNum target={pct} />
       </div>
     </div>
@@ -158,31 +147,23 @@ function AllocRow({ meta, pct, delay }) {
 /* ── Suggestion row ───────────────────────────────────────────── */
 function SugRow({ meta, items }) {
   return (
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: '28px 110px 1fr',
-      gap: 10,
-      padding: '10px 0',
-      borderBottom: '1px solid #f1f5f9',
-      alignItems: 'flex-start',
-    }}>
-      <span style={{ fontSize: 16, paddingTop: 1 }}>{meta.icon}</span>
-      <div style={{ fontSize: 12, fontWeight: 700, color: '#475569', letterSpacing: '0.04em', paddingTop: 3 }}>
+    <div className="grid grid-cols-[28px_110px_1fr] gap-2.5 py-2.5 border-b border-[#f1f5f9] items-start">
+      <span className="text-[16px] pt-[1px]">{meta.icon}</span>
+      <div className="text-[12px] font-bold text-slate-500 tracking-[0.04em] pt-[3px]">
         {meta.label.toUpperCase()}
       </div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+      <div className="flex flex-wrap gap-1.5">
         {items.map((item, i) => (
-          <span key={i} style={{
-            padding: '4px 10px',
-            borderRadius: 999,
-            background: meta.light,
-            border: `1.2px solid ${meta.color}33`,
-            fontSize: 11.5,
-            fontWeight: 600,
-            color: meta.color,
-            lineHeight: 1.4,
-            whiteSpace: 'nowrap',
-          }}>
+          // light and color are dynamic values from ASSET_META
+          <span
+            key={i}
+            className="px-2.5 py-1 rounded-full text-[11.5px] font-semibold whitespace-nowrap leading-[1.4]"
+            style={{
+              background: meta.light,
+              border: `1.2px solid ${meta.color}33`,
+              color: meta.color,
+            }}
+          >
             {item}
           </span>
         ))}
@@ -255,7 +236,6 @@ export default function SuggestionOutput({ values, visible }) {
 
   const cardRef = useRef(null);
 
-  // Smooth scroll into view when the card becomes visible
   useEffect(() => {
     if (visible && cardRef.current) {
       setTimeout(() => {
@@ -269,39 +249,30 @@ export default function SuggestionOutput({ values, visible }) {
   return (
     <div
       ref={cardRef}
-      style={{
-        marginTop: 28,
-        animation: 'suggestionReveal 0.55s cubic-bezier(0.34,1.56,0.64,1) both',
-      }}
+      className="mt-7"
+      style={{ animation: 'suggestionReveal 0.55s cubic-bezier(0.34,1.56,0.64,1) both' }}
     >
       {/* ── Section eyebrow ── */}
-      <div style={{ marginBottom: 14 }}>
-        <div style={{
-          fontSize: 10.5, fontWeight: 700, color: '#2a6a3f',
-          letterSpacing: '0.14em', marginBottom: 6,
-        }}>
+      <div className="mb-3.5">
+        <div className="text-[10.5px] font-bold text-[#2a6a3f] tracking-[0.14em] mb-1.5">
           SUGGESTION OUTPUT
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
-          <h2 style={{ fontSize: 20, fontWeight: 800, color: '#0d1f3d', letterSpacing: '-0.02em' }}>
+        <div className="flex items-center justify-between flex-wrap gap-2.5">
+          <h2 className="text-[20px] font-extrabold text-[#0d1f3d] tracking-[-0.02em]">
             Your Portfolio Report
           </h2>
 
           {/* Action buttons */}
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div className="flex gap-2">
             {/* Copy */}
             <button
               id="btn-copy-report"
               onClick={() => copy(plainText)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                padding: '7px 14px', borderRadius: 8,
-                background: copied ? '#f0fdf4' : '#f8fafc',
-                border: `1.5px solid ${copied ? '#86efac' : '#e2e8f0'}`,
-                color: copied ? '#16a34a' : '#475569',
-                fontSize: 12, fontWeight: 700, cursor: 'pointer',
-                transition: 'all 0.2s',
-              }}
+              className={`flex items-center gap-1.5 px-3.5 py-[7px] rounded-lg text-[12px] font-bold cursor-pointer transition-all
+                border-[1.5px] ${copied
+                  ? 'bg-[#f0fdf4] border-[#86efac] text-[#16a34a]'
+                  : 'bg-[#f8fafc] border-slate-200 text-slate-500'
+                }`}
             >
               {copied ? (
                 <>
@@ -325,17 +296,7 @@ export default function SuggestionOutput({ values, visible }) {
             <button
               id="btn-print-report"
               onClick={() => window.print()}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                padding: '7px 14px', borderRadius: 8,
-                background: '#0d1f3d',
-                border: '1.5px solid #0d1f3d',
-                color: '#ffffff',
-                fontSize: 12, fontWeight: 700, cursor: 'pointer',
-                transition: 'all 0.2s',
-              }}
-              onMouseEnter={e => { e.currentTarget.style.background = '#1a3560'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = '#0d1f3d'; }}
+              className="flex items-center gap-1.5 px-3.5 py-[7px] rounded-lg bg-[#0d1f3d] border-[1.5px] border-[#0d1f3d] text-white text-[12px] font-bold cursor-pointer transition-all hover:bg-[#1a3560]"
             >
               <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <polyline points="6 9 6 2 18 2 18 9" />
@@ -349,178 +310,113 @@ export default function SuggestionOutput({ values, visible }) {
       </div>
 
       {/* ── Report card ── */}
-      <div style={{
-        background: '#ffffff',
-        borderRadius: 16,
-        border: '1px solid #e2e8f0',
-        boxShadow: '0 4px 24px rgba(0,0,0,0.07)',
-        overflow: 'hidden',
-      }}>
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_4px_24px_rgba(0,0,0,0.07)] overflow-hidden">
 
         {/* ── Header strip ── */}
-        <div style={{
-          background: 'linear-gradient(135deg, #0d2142 0%, #0d1f3d 100%)',
-          padding: '20px 28px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 12,
-          flexWrap: 'wrap',
-        }}>
+        <div
+          className="flex items-center justify-between gap-3 flex-wrap px-7 py-5"
+          style={{ background: 'linear-gradient(135deg, #0d2142 0%, #0d1f3d 100%)' }}
+        >
           <div>
-            <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.12em', marginBottom: 4 }}>
+            <div className="text-[10px] font-bold text-white/40 tracking-[0.12em] mb-1">
               EQUILIBRIUM FINANCE · PORTFOLIO REPORT
             </div>
-            <div style={{ fontSize: 16, fontWeight: 800, color: '#ffffff' }}>
+            <div className="text-[16px] font-extrabold text-white">
               {riskLabel} Risk Profile &mdash; {goalLabel}
             </div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', marginTop: 3 }}>
+            <div className="text-[11px] text-white/45 mt-[3px]">
               {duration}-year investment horizon · Generated {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
             </div>
           </div>
-          <div style={{
-            padding: '10px 18px', borderRadius: 10,
-            background: 'rgba(255,255,255,0.07)',
-            border: '1px solid rgba(255,255,255,0.12)',
-          }}>
-            <div style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em', marginBottom: 3 }}>
-              EXPECTED ANNUAL RETURN
-            </div>
-            <div style={{ fontSize: 26, fontWeight: 900, color: '#5dde8a', lineHeight: 1, letterSpacing: '-0.02em' }}>
+          <div className="px-[18px] py-2.5 rounded-[10px] bg-white/[0.07] border border-white/[0.12]">
+            <div className="text-[9px] font-bold text-white/40 tracking-[0.1em] mb-[3px]">EXPECTED ANNUAL RETURN</div>
+            <div className="text-[26px] font-black text-[#5dde8a] leading-none tracking-[-0.02em]">
               {minR}% – {maxR}%
             </div>
           </div>
         </div>
 
         {/* ── Section 1: Portfolio Allocation ── */}
-        <div style={{ padding: '24px 28px 8px' }}>
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: 8,
-            marginBottom: 4,
-          }}>
-            <div style={{
-              width: 28, height: 28, borderRadius: 8,
-              background: '#f0f4ff',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 14, flexShrink: 0,
-            }}>
-              📊
-            </div>
+        <div className="px-7 pt-6 pb-2">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="w-7 h-7 rounded-lg bg-[#f0f4ff] flex items-center justify-center text-[14px] shrink-0">📊</div>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: '#0d1f3d' }}>Portfolio Allocation</div>
-              <div style={{ fontSize: 10.5, color: '#94a3b8' }}>Percentage split across asset classes</div>
+              <div className="text-[13px] font-extrabold text-[#0d1f3d]">Portfolio Allocation</div>
+              <div className="text-[10.5px] text-slate-400">Percentage split across asset classes</div>
             </div>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <div className="flex flex-col">
             {ASSET_META.map((meta, i) => (
               <AllocRow key={meta.key} meta={meta} pct={allocation[meta.key]} delay={i * 80} />
             ))}
           </div>
 
           {/* Total row */}
-          <div style={{
-            display: 'flex', justifyContent: 'flex-end', alignItems: 'center',
-            gap: 8, paddingTop: 10, paddingBottom: 4,
-          }}>
-            <span style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8' }}>TOTAL</span>
-            <span style={{
-              padding: '3px 12px', borderRadius: 999,
-              background: '#f0fdf4', border: '1px solid #86efac',
-              fontSize: 12, fontWeight: 800, color: '#16a34a',
-            }}>
+          <div className="flex justify-end items-center gap-2 pt-2.5 pb-1">
+            <span className="text-[11px] font-semibold text-slate-400">TOTAL</span>
+            <span className="px-3 py-[3px] rounded-full bg-[#f0fdf4] border border-[#86efac] text-[12px] font-extrabold text-[#16a34a]">
               100%
             </span>
           </div>
         </div>
 
         {/* ── Divider ── */}
-        <div style={{ height: 1, background: '#e2e8f0', margin: '0 28px' }} />
+        <div className="h-px bg-slate-200 mx-7" />
 
         {/* ── Section 2: Expected Return detail ── */}
-        <div style={{ padding: '20px 28px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-            <div style={{
-              width: 28, height: 28, borderRadius: 8,
-              background: '#fff7ed',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 14, flexShrink: 0,
-            }}>
-              📈
-            </div>
+        <div className="px-7 py-5">
+          <div className="flex items-center gap-2 mb-3.5">
+            <div className="w-7 h-7 rounded-lg bg-[#fff7ed] flex items-center justify-center text-[14px] shrink-0">📈</div>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: '#0d1f3d' }}>Expected Return</div>
-              <div style={{ fontSize: 10.5, color: '#94a3b8' }}>Annualised estimate based on your profile</div>
+              <div className="text-[13px] font-extrabold text-[#0d1f3d]">Expected Return</div>
+              <div className="text-[10.5px] text-slate-400">Annualised estimate based on your profile</div>
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          <div className="flex gap-3 flex-wrap">
             {/* Conservative */}
-            <div style={{
-              flex: 1, minWidth: 140,
-              padding: '14px 18px', borderRadius: 12,
-              background: '#f8fafc', border: '1.5px solid #e2e8f0',
-            }}>
-              <div style={{ fontSize: 9, fontWeight: 700, color: '#94a3b8', letterSpacing: '0.1em', marginBottom: 6 }}>
-                CONSERVATIVE ESTIMATE
-              </div>
-              <div style={{ fontSize: 28, fontWeight: 900, color: '#0d1f3d', lineHeight: 1 }}>
-                {minR}% <span style={{ fontSize: 12, color: '#94a3b8' }}>p.a.</span>
+            <div className="flex-1 min-w-[140px] px-[18px] py-3.5 rounded-xl bg-[#f8fafc] border-[1.5px] border-slate-200">
+              <div className="text-[9px] font-bold text-slate-400 tracking-[0.1em] mb-1.5">CONSERVATIVE ESTIMATE</div>
+              <div className="text-[28px] font-black text-[#0d1f3d] leading-none">
+                {minR}% <span className="text-[12px] text-slate-400">p.a.</span>
               </div>
             </div>
             {/* Optimistic */}
-            <div style={{
-              flex: 1, minWidth: 140,
-              padding: '14px 18px', borderRadius: 12,
-              background: 'linear-gradient(135deg, #0d2142, #0d1f3d)',
-              border: '1.5px solid #1a3560',
-            }}>
-              <div style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em', marginBottom: 6 }}>
-                OPTIMISTIC ESTIMATE
-              </div>
-              <div style={{ fontSize: 28, fontWeight: 900, color: '#5dde8a', lineHeight: 1 }}>
-                {maxR}% <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>p.a.</span>
+            <div
+              className="flex-1 min-w-[140px] px-[18px] py-3.5 rounded-xl border-[1.5px] border-[#1a3560]"
+              style={{ background: 'linear-gradient(135deg, #0d2142, #0d1f3d)' }}
+            >
+              <div className="text-[9px] font-bold text-white/40 tracking-[0.1em] mb-1.5">OPTIMISTIC ESTIMATE</div>
+              <div className="text-[28px] font-black text-[#5dde8a] leading-none">
+                {maxR}% <span className="text-[12px] text-white/40">p.a.</span>
               </div>
             </div>
             {/* Range */}
-            <div style={{
-              flex: 1, minWidth: 140,
-              padding: '14px 18px', borderRadius: 12,
-              background: '#f0fdf4', border: '1.5px solid #bbf7d0',
-              display: 'flex', flexDirection: 'column', justifyContent: 'center',
-            }}>
-              <div style={{ fontSize: 9, fontWeight: 700, color: '#16a34a', letterSpacing: '0.1em', marginBottom: 6 }}>
-                ESTIMATED RANGE
-              </div>
-              <div style={{ fontSize: 20, fontWeight: 900, color: '#16a34a', lineHeight: 1 }}>
+            <div className="flex flex-col justify-center flex-1 min-w-[140px] px-[18px] py-3.5 rounded-xl bg-[#f0fdf4] border-[1.5px] border-[#bbf7d0]">
+              <div className="text-[9px] font-bold text-[#16a34a] tracking-[0.1em] mb-1.5">ESTIMATED RANGE</div>
+              <div className="text-[20px] font-black text-[#16a34a] leading-none">
                 {minR}% – {maxR}%
               </div>
-              <div style={{ fontSize: 10, color: '#86efac', marginTop: 4 }}>per annum, annualised</div>
+              <div className="text-[10px] text-[#86efac] mt-1">per annum, annualised</div>
             </div>
           </div>
         </div>
 
         {/* ── Divider ── */}
-        <div style={{ height: 1, background: '#e2e8f0', margin: '0 28px' }} />
+        <div className="h-px bg-slate-200 mx-7" />
 
         {/* ── Section 3: Investment Suggestions ── */}
-        <div style={{ padding: '20px 28px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-            <div style={{
-              width: 28, height: 28, borderRadius: 8,
-              background: '#f5f3ff',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 14, flexShrink: 0,
-            }}>
-              💡
-            </div>
+        <div className="px-7 py-5">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="w-7 h-7 rounded-lg bg-[#f5f3ff] flex items-center justify-center text-[14px] shrink-0">💡</div>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: '#0d1f3d' }}>Investment Suggestions</div>
-              <div style={{ fontSize: 10.5, color: '#94a3b8' }}>2–3 recommended instruments per asset class</div>
+              <div className="text-[13px] font-extrabold text-[#0d1f3d]">Investment Suggestions</div>
+              <div className="text-[10.5px] text-slate-400">2–3 recommended instruments per asset class</div>
             </div>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <div className="flex flex-col">
             {ASSET_META.map(meta => (
               <SugRow key={meta.key} meta={meta} items={sug[meta.key]} />
             ))}
@@ -528,44 +424,24 @@ export default function SuggestionOutput({ values, visible }) {
         </div>
 
         {/* ── Divider ── */}
-        <div style={{ height: 1, background: '#e2e8f0' }} />
+        <div className="h-px bg-slate-200" />
 
         {/* ── Plain-text preview panel ── */}
-        <div style={{ padding: '20px 28px', background: '#f8fafc' }}>
-          <div style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            marginBottom: 10, flexWrap: 'wrap', gap: 8,
-          }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#475569', letterSpacing: '0.06em' }}>
+        <div className="px-7 py-5 bg-[#f8fafc]">
+          <div className="flex items-center justify-between mb-2.5 flex-wrap gap-2">
+            <div className="text-[11px] font-bold text-slate-500 tracking-[0.06em]">
               📋 PLAIN TEXT OUTPUT — Copy this to use anywhere
             </div>
             <button
               id="btn-copy-text"
               onClick={() => copy(plainText)}
-              style={{
-                padding: '5px 12px', borderRadius: 6, border: '1.5px solid #e2e8f0',
-                background: copied ? '#f0fdf4' : '#ffffff',
-                color: copied ? '#16a34a' : '#64748b',
-                fontSize: 11, fontWeight: 700, cursor: 'pointer',
-                transition: 'all 0.2s',
-              }}
+              className={`px-3 py-[5px] rounded-[6px] border-[1.5px] border-slate-200 text-[11px] font-bold cursor-pointer transition-all
+                ${copied ? 'bg-[#f0fdf4] text-[#16a34a]' : 'bg-white text-slate-500'}`}
             >
               {copied ? '✓ Copied' : 'Copy'}
             </button>
           </div>
-          <pre style={{
-            fontFamily: '"Courier New", Courier, monospace',
-            fontSize: 11.5,
-            lineHeight: 1.75,
-            color: '#334155',
-            background: '#ffffff',
-            border: '1px solid #e2e8f0',
-            borderRadius: 10,
-            padding: '16px 20px',
-            overflowX: 'auto',
-            whiteSpace: 'pre',
-            userSelect: 'all',
-          }}>
+          <pre className="font-mono text-[11.5px] leading-[1.75] text-slate-700 bg-white border border-slate-200 rounded-xl p-5 overflow-x-auto whitespace-pre select-all">
 {`Portfolio Allocation:
   Stocks       : ${allocation.stocks}%
   Bonds        : ${allocation.bonds}%
@@ -586,8 +462,8 @@ Investment Suggestions:
         </div>
 
         {/* ── Disclaimer ── */}
-        <div style={{ padding: '12px 28px', background: '#fffbeb', borderTop: '1px solid #fde68a' }}>
-          <p style={{ fontSize: 10.5, color: '#92400e', lineHeight: 1.6 }}>
+        <div className="px-7 py-3 bg-[#fffbeb] border-t border-[#fde68a]">
+          <p className="text-[10.5px] text-[#92400e] leading-[1.6]">
             ⚠️ <strong>Disclaimer:</strong> This suggestion report is generated algorithmically based on inputs provided and is for{' '}
             <strong>informational purposes only</strong>. It does not constitute personalised financial advice.
             Please consult a certified financial advisor before making investment decisions.

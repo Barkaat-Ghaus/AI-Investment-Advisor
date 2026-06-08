@@ -36,63 +36,39 @@ export default function ProjectionCard({ projection, values, calculated }) {
   const riskLabel = values.risk ? values.risk.charAt(0).toUpperCase() + values.risk.slice(1) : 'Medium';
 
   return (
-    <div style={{
-      background: '#0d2142',
-      borderRadius: 16,
-      border: '1px solid rgba(255,255,255,0.06)',
-      padding: '26px 24px',
-      color: '#ffffff',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 0,
-      minWidth: 220,
-    }}>
+    <div className="bg-[#0d2142] rounded-2xl border border-white/[0.06] p-[26px_24px] text-white flex flex-col min-w-[220px]">
       {/* Projection Summary */}
-      <div style={{ marginBottom: 28 }}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: '#ffffff', marginBottom: 10 }}>
-          Projection Summary
-        </div>
-        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', lineHeight: 1.65, marginBottom: 20 }}>
-          Based on your <strong style={{ color: 'rgba(255,255,255,0.85)' }}>{riskLabel} risk</strong> tolerance and{' '}
-          <strong style={{ color: 'rgba(255,255,255,0.85)' }}>{values.duration}-year</strong> horizon, we estimate a{' '}
-          <strong style={{ color: '#5dde8a' }}>{annualReturn}% annual yield.</strong>
+      <div className="mb-7">
+        <div className="text-[14px] font-bold text-white mb-2.5">Projection Summary</div>
+        <p className="text-[12px] text-white/55 leading-[1.65] mb-5">
+          Based on your <strong className="text-white/85">{riskLabel} risk</strong> tolerance and{' '}
+          <strong className="text-white/85">{values.duration}-year</strong> horizon, we estimate a{' '}
+          <strong className="text-[#5dde8a]">{annualReturn}% annual yield.</strong>
         </p>
 
-        <div style={{
-          fontFamily: 'Inter, sans-serif',
-          fontSize: 38,
-          fontWeight: 800,
-          color: '#ffffff',
-          lineHeight: 1,
-          marginBottom: 6,
-          letterSpacing: '-0.02em',
-        }}>
+        <div className="font-inter text-[38px] font-extrabold text-white leading-none mb-1.5 tracking-[-0.02em]">
           {formatWealth(displayWealth)}
         </div>
-        <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', color: 'rgba(255,255,255,0.4)' }}>
+        <div className="text-[10px] font-semibold tracking-[0.1em] text-white/40">
           ESTIMATED WEALTH AT MATURITY
         </div>
       </div>
 
       {/* Divider */}
-      <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', marginBottom: 20 }} />
+      <div className="h-px bg-white/[0.07] mb-5" />
 
       {/* Advisor Analysis */}
       <div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+        <div className="flex items-center gap-2 mb-3">
           {/* Green check icon */}
-          <div style={{
-            width: 22, height: 22, borderRadius: '50%',
-            background: 'rgba(61,158,95,0.25)', border: '1.5px solid #3d9e5f',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-          }}>
+          <div className="w-[22px] h-[22px] rounded-full bg-[rgba(61,158,95,0.25)] border-[1.5px] border-[#3d9e5f] flex items-center justify-center shrink-0">
             <svg width="11" height="11" fill="none" stroke="#5dde8a" strokeWidth="2.5" viewBox="0 0 24 24">
               <polyline points="20 6 9 17 4 12" />
             </svg>
           </div>
-          <span style={{ fontSize: 13, fontWeight: 700, color: '#ffffff' }}>Advisor Analysis</span>
+          <span className="text-[13px] font-bold text-white">Advisor Analysis</span>
         </div>
-        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', lineHeight: 1.7, fontStyle: 'italic' }}>
+        <p className="text-[12px] text-white/50 leading-[1.7] italic">
           {quote}
         </p>
       </div>

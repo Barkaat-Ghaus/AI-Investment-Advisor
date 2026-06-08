@@ -1,6 +1,14 @@
 import { create } from "zustand";
 import API_BASE_URL from '../config/api'; 
 
+// Safely parse JSON — guards against HTML error pages (e.g. Render cold-start)
+const safeJson = async (res) => {
+  const contentType = res.headers.get('content-type') || '';
+  if (contentType.includes('application/json')) return res.json();
+  if (res.status === 503 || res.status === 502) return { message: 'The server is starting up, please try again in a few seconds.' };
+  return { message: `Server error (${res.status})` };
+};
+
 const DEFAULT_VALUES = {
   income:     60000,
   investment: 20000,
@@ -43,7 +51,7 @@ const useAdvisorStore = create((set, get) => ({
         body: JSON.stringify({ message })
       });
 
-      const data = await res.json();
+      const data = await safeJson(res);
 
       if (data.answer) {
         if (data.success) {
@@ -78,7 +86,7 @@ const useAdvisorStore = create((set, get) => ({
         }),
       });
 
-      const allocData = await allocRes.json();
+      const allocData = await safeJson(allocRes);
       if (allocData.allocation) {
         set({ aiAllocation: allocData.allocation });
       }
@@ -153,7 +161,7 @@ const useAdvisorStore = create((set, get) => ({
         body: JSON.stringify(advisoryData),
       });
 
-      const data = await res.json();
+      const data = await safeJson(res);
 
       if (res.ok) {
         set({ 

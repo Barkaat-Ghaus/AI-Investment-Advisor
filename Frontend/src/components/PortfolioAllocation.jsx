@@ -1,22 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 /* ── Allocation Engine ─────────────────────────────────────────── */
-/**
- * Determines portfolio split (total = 100) based on:
- *  - risk:  'low' | 'medium' | 'high'
- *  - goal:  'retirement' | 'wealth_growth' | 'education' | 'house_purchase'
- *  - income (monthly, numeric)
- *  - duration (years, numeric)
- */
 function computeAllocation(risk, goal, income, duration) {
-  // Base allocations by risk
   const base = {
     low:    { stocks: 20, bonds: 35, gold: 15, mutualFunds: 15, cash: 15 },
     medium: { stocks: 40, bonds: 20, gold: 10, mutualFunds: 22, cash:  8 },
     high:   { stocks: 65, bonds:  8, gold:  7, mutualFunds: 16, cash:  4 },
   }[risk] ?? { stocks: 40, bonds: 20, gold: 10, mutualFunds: 22, cash: 8 };
 
-  // Goal tweaks (additive deltas, normalised later)
   const goalDelta = {
     retirement:    { stocks: -5,  bonds: +8,  gold: +2,  mutualFunds: -3, cash: -2 },
     wealth_growth: { stocks: +8,  bonds: -5,  gold: -1,  mutualFunds: +2, cash: -4 },
@@ -24,7 +15,6 @@ function computeAllocation(risk, goal, income, duration) {
     house_purchase:{ stocks: -8,  bonds: +2,  gold: 0,   mutualFunds: -2, cash: +8 },
   }[goal] ?? { stocks: 0, bonds: 0, gold: 0, mutualFunds: 0, cash: 0 };
 
-  // Duration tweak: longer horizon → tilt toward growth
   const durationBonus = duration >= 20 ? 5 : duration >= 10 ? 2 : 0;
   const durationKey = risk === 'low' ? 'bonds' : risk === 'high' ? 'stocks' : 'mutualFunds';
 
@@ -34,7 +24,6 @@ function computeAllocation(risk, goal, income, duration) {
     raw[k] = Math.max(2, base[k] + (goalDelta[k] || 0) + (k === durationKey ? durationBonus : 0));
   });
 
-  // Normalise to exactly 100
   const total = keys.reduce((s, k) => s + raw[k], 0);
   const scale = 100 / total;
   const normalized = {};
@@ -95,7 +84,7 @@ const ASSET_META = [
   { key: 'cash',        label: 'Cash / FD',     color: '#0891b2', light: '#e0f7fa' },
 ];
 
-function DonutChart({ allocation, animated }) {
+function DonutChart({ allocation }) {
   const size = 180;
   const cx = size / 2, cy = size / 2;
   const R = 72, r = 44;
@@ -107,7 +96,7 @@ function DonutChart({ allocation, animated }) {
   }));
 
   const total = segments.reduce((s, seg) => s + seg.pct, 0);
-  let angle = -90; // start at top
+  let angle = -90;
 
   const paths = segments.map(seg => {
     const sweep = (seg.pct / total) * (360 - gap * segments.length);
@@ -140,7 +129,7 @@ function DonutChart({ allocation, animated }) {
         <path
           key={p.key}
           d={p.d}
-          fill={hovered === i ? p.color : p.color}
+          fill={p.color}
           opacity={hovered !== null && hovered !== i ? 0.35 : 1}
           style={{
             transition: 'opacity 0.2s, transform 0.2s',
@@ -153,7 +142,6 @@ function DonutChart({ allocation, animated }) {
           onMouseLeave={() => setHovered(null)}
         />
       ))}
-      {/* Center label */}
       <text x={cx} y={cy - 6} textAnchor="middle" fontSize="11" fontWeight="800" fill="#0d1f3d" fontFamily="Inter,sans-serif">
         {hovered !== null ? `${paths[hovered].pct}%` : '100%'}
       </text>
@@ -173,24 +161,25 @@ function AllocationBar({ meta, pct, animated }) {
   }, [pct, animated]);
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-      {/* Color dot */}
-      <div style={{
-        width: 10, height: 10, borderRadius: '50%', background: meta.color, flexShrink: 0,
-      }} />
+    <div className="flex items-center gap-2.5">
+      {/* Color dot — color is a dynamic JS value from ASSET_META, must stay inline */}
+      <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: meta.color }} />
       {/* Label */}
-      <span style={{ fontSize: 12.5, fontWeight: 600, color: '#0d1f3d', width: 92, flexShrink: 0 }}>
-        {meta.label}
-      </span>
-      {/* Bar */}
-      <div style={{ flex: 1, height: 7, borderRadius: 4, background: '#f1f5f9', overflow: 'hidden' }}>
-        <div style={{
-          height: '100%', width: `${width}%`, background: meta.color,
-          borderRadius: 4, transition: 'width 0.8s cubic-bezier(0.34,1.56,0.64,1)',
-        }} />
+      <span className="text-[12.5px] font-semibold text-[#0d1f3d] w-[92px] shrink-0">{meta.label}</span>
+      {/* Bar track */}
+      <div className="flex-1 h-[7px] rounded bg-[#f1f5f9] overflow-hidden">
+        {/* Bar fill — width is animated JS state, must stay inline */}
+        <div
+          className="h-full rounded"
+          style={{
+            width: `${width}%`,
+            background: meta.color,
+            transition: 'width 0.8s cubic-bezier(0.34,1.56,0.64,1)',
+          }}
+        />
       </div>
-      {/* Percent */}
-      <span style={{ fontSize: 13, fontWeight: 800, color: meta.color, width: 34, textAlign: 'right', flexShrink: 0 }}>
+      {/* Percent — color is dynamic */}
+      <span className="text-[13px] font-extrabold w-[34px] text-right shrink-0" style={{ color: meta.color }}>
         {pct}%
       </span>
     </div>
@@ -200,13 +189,11 @@ function AllocationBar({ meta, pct, animated }) {
 /* ── Suggestion Chip ───────────────────────────────────────────── */
 function Chip({ label, color, light }) {
   return (
-    <div style={{
-      display: 'inline-flex', alignItems: 'center', gap: 6,
-      padding: '5px 11px', borderRadius: 999,
-      background: light, border: `1.2px solid ${color}33`,
-      fontSize: 11.5, fontWeight: 600, color, lineHeight: 1.3,
-      whiteSpace: 'nowrap',
-    }}>
+    // light and color are dynamic runtime values from ASSET_META
+    <div
+      className="inline-flex items-center gap-1.5 px-[11px] py-[5px] rounded-full text-[11.5px] font-semibold whitespace-nowrap leading-[1.3]"
+      style={{ background: light, border: `1.2px solid ${color}33`, color }}
+    >
       {label}
     </div>
   );
@@ -233,32 +220,30 @@ export default function PortfolioAllocation({ values, calculated }) {
     education: 'Education', house_purchase: 'House Purchase',
   }[goal] ?? 'Wealth Growth';
 
-  return (
-    <div style={{ marginTop: 24 }}>
+  // Risk badge colors — conditional on JS string value, cannot be static Tailwind
+  const riskBg    = risk === 'low' ? '#f0fdf4' : risk === 'high' ? '#fef2f2' : '#fffbeb';
+  const riskColor = risk === 'low' ? '#16a34a' : risk === 'high' ? '#dc2626' : '#d97706';
+  const riskBorder= risk === 'low' ? '#bbf7d0' : risk === 'high' ? '#fecaca' : '#fde68a';
 
+  return (
+    <div className="mt-6">
       {/* ── Section Header ── */}
-      <div style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 10.5, fontWeight: 700, color: '#2a6a3f', letterSpacing: '0.14em', marginBottom: 6 }}>
+      <div className="mb-4">
+        <div className="text-[10.5px] font-bold text-[#2a6a3f] tracking-[0.14em] mb-1.5">
           PORTFOLIO ALLOCATION
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-          <h2 style={{ fontSize: 20, fontWeight: 800, color: '#0d1f3d', letterSpacing: '-0.02em' }}>
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <h2 className="text-[20px] font-extrabold text-[#0d1f3d] tracking-[-0.02em]">
             Optimal Portfolio Mix
           </h2>
-          <div style={{ display: 'flex', gap: 6 }}>
-            <span style={{
-              padding: '3px 10px', borderRadius: 999, fontSize: 11, fontWeight: 700,
-              background: risk === 'low' ? '#f0fdf4' : risk === 'high' ? '#fef2f2' : '#fffbeb',
-              color: risk === 'low' ? '#16a34a' : risk === 'high' ? '#dc2626' : '#d97706',
-              border: `1px solid ${risk === 'low' ? '#bbf7d0' : risk === 'high' ? '#fecaca' : '#fde68a'}`,
-            }}>
+          <div className="flex gap-1.5">
+            <span
+              className="px-[10px] py-[3px] rounded-full text-[11px] font-bold border"
+              style={{ background: riskBg, color: riskColor, borderColor: riskBorder }}
+            >
               {riskLabel}
             </span>
-            <span style={{
-              padding: '3px 10px', borderRadius: 999, fontSize: 11, fontWeight: 700,
-              background: '#f0f4ff', color: '#4361ee',
-              border: '1px solid #c7d2fe',
-            }}>
+            <span className="px-[10px] py-[3px] rounded-full text-[11px] font-bold bg-[#f0f4ff] text-[#4361ee] border border-[#c7d2fe]">
               {goalLabel}
             </span>
           </div>
@@ -266,37 +251,20 @@ export default function PortfolioAllocation({ values, calculated }) {
       </div>
 
       {/* ── Card ── */}
-      <div style={{
-        background: '#ffffff',
-        borderRadius: 16,
-        border: '1px solid #e2e8f0',
-        boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
-        overflow: 'hidden',
-      }}>
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.06)] overflow-hidden">
 
         {/* Top: Donut + Bars */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '200px 1fr',
-          gap: 0,
-        }}>
-
+        <div className="grid grid-cols-[200px_1fr]">
           {/* Donut side */}
-          <div style={{
-            display: 'flex', flexDirection: 'column',
-            alignItems: 'center', justifyContent: 'center',
-            padding: '28px 16px',
-            background: '#f8fafc',
-            borderRight: '1px solid #e2e8f0',
-          }}>
+          <div className="flex flex-col items-center justify-center py-7 px-4 bg-[#f8fafc] border-r border-slate-200">
             <DonutChart allocation={allocation} animated={calculated} />
-            <div style={{ marginTop: 10, fontSize: 10, fontWeight: 700, color: '#94a3b8', letterSpacing: '0.1em' }}>
+            <div className="mt-2.5 text-[10px] font-bold text-slate-400 tracking-[0.1em]">
               HOVER TO EXPLORE
             </div>
           </div>
 
           {/* Bars side */}
-          <div style={{ padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: 13, justifyContent: 'center' }}>
+          <div className="px-7 py-6 flex flex-col gap-[13px] justify-center">
             {ASSET_META.map(meta => (
               <AllocationBar key={meta.key} meta={meta} pct={allocation[meta.key]} animated={calculated} />
             ))}
@@ -304,68 +272,58 @@ export default function PortfolioAllocation({ values, calculated }) {
         </div>
 
         {/* Divider */}
-        <div style={{ height: 1, background: '#e2e8f0' }} />
+        <div className="h-px bg-slate-200" />
 
         {/* Expected Return Banner */}
-        <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap',
-          padding: '16px 28px', gap: 16,
-          background: 'linear-gradient(135deg, #0d2142 0%, #0d1f3d 100%)',
-        }}>
+        <div
+          className="flex items-center justify-between flex-wrap gap-4 px-7 py-4"
+          style={{ background: 'linear-gradient(135deg, #0d2142 0%, #0d1f3d 100%)' }}
+        >
           <div>
-            <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.12em', marginBottom: 3 }}>
+            <div className="text-[10px] font-bold text-white/45 tracking-[0.12em] mb-[3px]">
               EXPECTED ANNUAL RETURN
             </div>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-              <span style={{ fontSize: 28, fontWeight: 900, color: '#5dde8a', lineHeight: 1, letterSpacing: '-0.02em' }}>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-[28px] font-black text-[#5dde8a] leading-none tracking-[-0.02em]">
                 {minR}% – {maxR}%
               </span>
-              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>
-                annualised estimate
-              </span>
+              <span className="text-[11px] text-white/40 font-medium">annualised estimate</span>
             </div>
           </div>
-          <div style={{
-            padding: '10px 18px', borderRadius: 10,
-            background: 'rgba(255,255,255,0.07)',
-            border: '1px solid rgba(255,255,255,0.12)',
-            maxWidth: 340,
-          }}>
-            <p style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.6)', lineHeight: 1.65, fontStyle: 'italic' }}>
+          <div className="px-[18px] py-2.5 rounded-[10px] bg-white/[0.07] border border-white/[0.12] max-w-[340px]">
+            <p className="text-[11.5px] text-white/60 leading-[1.65] italic">
               {risk === 'low'
                 ? '🛡️ Capital-preservation focus. Stable bonds & gold hedge against volatility.'
                 : risk === 'high'
                 ? '🚀 Growth-first strategy. High equity concentration suits your long horizon.'
                 : '⚖️ Balanced diversification across growth & defensive assets.'}
-              {' '}Duration of <strong style={{ color: '#ffffff' }}>{duration} years</strong> amplifies compounding power.
+              {' '}Duration of <strong className="text-white">{duration} years</strong> amplifies compounding power.
             </p>
           </div>
         </div>
 
         {/* Divider */}
-        <div style={{ height: 1, background: '#e2e8f0' }} />
+        <div className="h-px bg-slate-200" />
 
         {/* Investment Suggestions */}
-        <div style={{ padding: '24px 28px' }}>
-          <div style={{ fontSize: 10.5, fontWeight: 700, color: '#94a3b8', letterSpacing: '0.1em', marginBottom: 16 }}>
+        <div className="px-7 py-6">
+          <div className="text-[10.5px] font-bold text-slate-400 tracking-[0.1em] mb-4">
             RECOMMENDED INSTRUMENTS
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div className="flex flex-col gap-3.5">
             {ASSET_META.map(meta => (
-              <div key={meta.key} style={{ display: 'flex', gap: 14, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+              <div key={meta.key} className="flex gap-3.5 items-start flex-wrap">
                 {/* Asset label */}
-                <div style={{
-                  display: 'flex', alignItems: 'center', gap: 7,
-                  minWidth: 120, flexShrink: 0, paddingTop: 2,
-                }}>
-                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: meta.color, flexShrink: 0 }} />
-                  <span style={{ fontSize: 12, fontWeight: 700, color: '#475569', letterSpacing: '0.04em' }}>
+                <div className="flex items-center gap-[7px] min-w-[120px] shrink-0 pt-0.5">
+                  {/* Dot — dynamic color */}
+                  <div className="w-2 h-2 rounded-full shrink-0" style={{ background: meta.color }} />
+                  <span className="text-[12px] font-bold text-slate-500 tracking-[0.04em]">
                     {meta.label.toUpperCase()}
                   </span>
                 </div>
                 {/* Chips */}
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                <div className="flex flex-wrap gap-1.5">
                   {sug[meta.key].map((s, i) => (
                     <Chip key={i} label={s} color={meta.color} light={meta.light} />
                   ))}
@@ -376,11 +334,11 @@ export default function PortfolioAllocation({ values, calculated }) {
         </div>
 
         {/* Divider */}
-        <div style={{ height: 1, background: '#e2e8f0' }} />
+        <div className="h-px bg-slate-200" />
 
         {/* Disclaimer */}
-        <div style={{ padding: '12px 28px', background: '#f8fafc' }}>
-          <p style={{ fontSize: 10.5, color: '#94a3b8', lineHeight: 1.6 }}>
+        <div className="px-7 py-3 bg-[#f8fafc]">
+          <p className="text-[10.5px] text-slate-400 leading-[1.6]">
             ⚠️ <strong>Disclaimer:</strong> This portfolio recommendation is generated algorithmically based on the inputs provided
             and is for <strong>informational purposes only</strong>. It does not constitute financial advice.
             Past performance is not indicative of future results. Please consult a certified financial advisor before investing.

@@ -1,6 +1,20 @@
 import { create } from "zustand";
 import API_BASE_URL from '../config/api';
 
+// Safely parse JSON — guards against HTML error pages (e.g. Render cold-start wake-up pages)
+const safeJson = async (res) => {
+  const contentType = res.headers.get('content-type') || '';
+  if (contentType.includes('application/json')) {
+    return res.json();
+  }
+  // Non-JSON body (HTML error page, plain text, etc.)
+  const text = await res.text();
+  if (res.status === 503 || res.status === 502) {
+    return { message: 'The server is starting up, please try again in a few seconds.' };
+  }
+  return { message: text.slice(0, 200) || `Server error (${res.status})` };
+};
+
 const useProfileStore = create((set, get) => ({
   profile: null,
   loading: false,
@@ -15,12 +29,12 @@ const useProfileStore = create((set, get) => ({
         }
       });
       if (res.ok) {
-        const data = await res.json();
+        const data = await safeJson(res);
         set({ profile: data, error: null });
       } else if (res.status === 404) {
         set({ profile: null, error: null });
       } else {
-        const errorData = await res.json();
+        const errorData = await safeJson(res);
         set({ profile: null, error: errorData.message });
       }
     } catch (err) {
@@ -41,10 +55,10 @@ const useProfileStore = create((set, get) => ({
         },
         body: JSON.stringify(profileData)
       });
-      const data = await res.json();
+      const data = await safeJson(res);
       if (res.ok) {
-        const profileData = data.profile || data;
-        set({ profile: profileData, error: null });
+        const savedProfile = data.profile || data;
+        set({ profile: savedProfile, error: null });
         return { success: true, message: data.message };
       } else {
         set({ error: data.message });

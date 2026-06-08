@@ -2,22 +2,15 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 
 /* ══════════════════════════════════════════════════════════════
-   CONFIG
+   CONFIG — kept only for canvas drawing (cannot use Tailwind in canvas ctx)
 ══════════════════════════════════════════════════════════════ */
-// Single accent: navy. All states use the same hue at different opacities.
 const C = {
-  navy:       '#0d1f3d',
-  navyLight:  '#1a3560',
-  slate50:    '#f8fafc',
-  slate100:   '#f1f5f9',
-  slate200:   '#e2e8f0',
-  slate300:   '#cbd5e1',
-  slate400:   '#94a3b8',
-  slate600:   '#475569',
-  slate700:   '#334155',
-  slate900:   '#0f172a',
-  white:      '#ffffff',
-  error:      '#ef4444',
+  navy:      '#0d1f3d',
+  navyLight: '#1a3560',
+  slate200:  '#e2e8f0',
+  slate400:  '#94a3b8',
+  white:     '#ffffff',
+  error:     '#ef4444',
 };
 
 const RISK_OPTIONS = [
@@ -42,7 +35,7 @@ function fmt(n) {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   GROWTH CHART — muted blue-slate palette
+   GROWTH CHART — canvas-based, C values used for ctx drawing
 ══════════════════════════════════════════════════════════════ */
 function GrowthChart({ duration, risk }) {
   const ref  = useRef(null);
@@ -71,7 +64,6 @@ function GrowthChart({ duration, risk }) {
 
     ctx.clearRect(0, 0, W, H);
 
-    // Horizontal grid lines — very subtle
     ctx.strokeStyle = 'rgba(255,255,255,0.06)';
     ctx.lineWidth = 1;
     [0.33, 0.66, 1].forEach(f => {
@@ -79,7 +71,6 @@ function GrowthChart({ duration, risk }) {
       ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(W - PAD.right, y); ctx.stroke();
     });
 
-    // Area fill — muted slate-blue gradient (no green)
     const grad = ctx.createLinearGradient(0, PAD.top, 0, H - PAD.bottom);
     grad.addColorStop(0, 'rgba(148,163,184,0.28)');
     grad.addColorStop(1, 'rgba(148,163,184,0.02)');
@@ -91,7 +82,6 @@ function GrowthChart({ duration, risk }) {
     ctx.closePath();
     ctx.fill();
 
-    // Line — crisp white
     ctx.strokeStyle = 'rgba(255,255,255,0.85)';
     ctx.lineWidth = 1.8;
     ctx.lineJoin = 'round';
@@ -99,7 +89,6 @@ function GrowthChart({ duration, risk }) {
     pts.forEach((p, i) => i === 0 ? ctx.moveTo(toX(p.x), toY(p.y)) : ctx.lineTo(toX(p.x), toY(p.y)));
     ctx.stroke();
 
-    // Key dots
     [0, Math.round(dur / 2), dur].forEach(i => {
       const p = pts[i];
       ctx.fillStyle = 'rgba(255,255,255,0.9)';
@@ -108,7 +97,6 @@ function GrowthChart({ duration, risk }) {
       ctx.beginPath(); ctx.arc(toX(p.x), toY(p.y), 1.4, 0, Math.PI * 2); ctx.fill();
     });
 
-    // Y labels
     ctx.font = '9px Inter, sans-serif';
     ctx.fillStyle = 'rgba(255,255,255,0.35)';
     ctx.textAlign = 'right';
@@ -117,7 +105,6 @@ function GrowthChart({ duration, risk }) {
       ctx.fillText(fmtY(v), PAD.left - 4, PAD.top + f + 3.5);
     });
 
-    // X labels
     ctx.fillStyle = 'rgba(255,255,255,0.35)';
     ctx.textAlign = 'center';
     [0, Math.round(dur / 2), dur].forEach(xi => ctx.fillText(`${xi}`, toX(xi), H - 7));
@@ -127,7 +114,7 @@ function GrowthChart({ duration, risk }) {
 
   }, [duration, risk]);
 
-  return <canvas ref={ref} style={{ width: '100%', height: '100%', display: 'block' }} />;
+  return <canvas ref={ref} className="w-full h-full block" />;
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -149,49 +136,42 @@ function MoneyInput({ id, label, field, error }) {
   };
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div className="relative">
       {/* Floating label */}
-      <label htmlFor={id} style={{
-        position: 'absolute', pointerEvents: 'none', zIndex: 2, left: 40,
-        transition: 'all 0.15s ease',
-        ...(lifted
-          ? { top: 8, fontSize: 10, fontWeight: 600, color: focused ? C.navy : C.slate400, letterSpacing: '0.04em', background: C.white, padding: '0 2px' }
-          : { top: '50%', transform: 'translateY(-50%)', fontSize: 13.5, fontWeight: 500, color: C.slate400 }),
-      }}>
+      <label
+        htmlFor={id}
+        className={`absolute pointer-events-none z-[2] left-10 transition-all duration-150 ease-in-out ${
+          lifted
+            ? `top-2 text-[10px] font-semibold tracking-[0.04em] bg-white px-0.5 ${focused ? 'text-[#0d1f3d]' : 'text-slate-400'}`
+            : 'top-1/2 -translate-y-1/2 text-[13.5px] font-medium text-slate-400'
+        }`}
+      >
         {label}
       </label>
 
-      <div style={{
-        display: 'flex', alignItems: 'center', height: 56,
-        borderRadius: 10,
-        border: `1.5px solid ${error ? C.error : focused ? C.navy : C.slate200}`,
-        background: C.white,
-        boxShadow: focused ? `0 0 0 3px rgba(13,31,61,0.06)` : 'none',
-        transition: 'border-color 0.15s, box-shadow 0.15s',
-        overflow: 'hidden',
-      }}>
-        <span style={{
-          paddingLeft: 14, paddingRight: 2, fontSize: 14, fontWeight: 700,
-          color: focused ? C.navy : C.slate400,
-          flexShrink: 0, userSelect: 'none', transition: 'color 0.15s',
-          alignSelf: 'flex-end', paddingBottom: 10,
-        }}>₹</span>
+      <div className={`flex items-center h-14 rounded-[10px] bg-white overflow-hidden transition-all duration-150
+        border-[1.5px] ${error ? 'border-red-400' : focused ? 'border-[#0d1f3d] shadow-[0_0_0_3px_rgba(13,31,61,0.06)]' : 'border-slate-200'}`}
+      >
+        <span className={`pl-3.5 pr-0.5 text-sm font-bold flex-shrink-0 select-none self-end pb-2.5 transition-colors duration-150
+          ${focused ? 'text-[#0d1f3d]' : 'text-slate-400'}`}>
+          ₹
+        </span>
         <input
-          id={id} type="text" inputMode="numeric"
-          ref={field.ref} name={field.name}
-          value={displayVal} onChange={handleChange}
+          id={id}
+          type="text"
+          inputMode="numeric"
+          ref={field.ref}
+          name={field.name}
+          value={displayVal}
+          onChange={handleChange}
           onFocus={() => setFocused(true)}
           onBlur={() => { setFocused(false); field.onBlur?.(); }}
-          style={{
-            flex: 1, background: 'transparent', border: 'none', outline: 'none',
-            fontSize: 15, fontWeight: 700, color: C.navy, fontFamily: 'inherit',
-            paddingBottom: 8, paddingTop: 18, paddingRight: 14,
-          }}
+          className="flex-1 bg-transparent border-none outline-none text-[15px] font-bold text-[#0d1f3d] font-inherit pb-2 pt-[18px] pr-3.5"
         />
       </div>
 
       {error && (
-        <p style={{ marginTop: 4, fontSize: 11, color: C.error, fontWeight: 500, paddingLeft: 2 }}>
+        <p className="mt-1 text-[11px] text-red-400 font-medium pl-0.5">
           {error.message}
         </p>
       )}
@@ -205,46 +185,52 @@ function MoneyInput({ id, label, field, error }) {
 function DurationSlider({ field }) {
   const { value, onChange } = field;
   const pct = ((value - 1) / 39) * 100;
+  // Track gradient must stay inline — uses a JS-computed pct variable
   const bg  = `linear-gradient(to right,${C.navy} 0%,${C.navy} ${pct}%,${C.slate200} ${pct}%,${C.slate200} 100%)`;
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 12 }}>
-        <span style={{ fontSize: 10.5, fontWeight: 700, color: C.slate400, letterSpacing: '0.1em' }}>
+      <div className="flex justify-between items-baseline mb-3">
+        <span className="text-[10.5px] font-bold text-slate-400 tracking-[0.1em]">
           INVESTMENT DURATION
         </span>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 3 }}>
-          <span style={{ fontSize: 22, fontWeight: 800, color: C.navy, lineHeight: 1 }}>{value}</span>
-          <span style={{ fontSize: 11.5, fontWeight: 600, color: C.slate400 }}>yrs</span>
+        <div className="flex items-baseline gap-[3px]">
+          <span className="text-[22px] font-extrabold text-[#0d1f3d] leading-none">{value}</span>
+          <span className="text-[11.5px] font-semibold text-slate-400">yrs</span>
         </div>
       </div>
       <input
-        type="range" min="1" max="40" value={value}
+        type="range"
+        min="1"
+        max="40"
+        value={value}
         onChange={e => onChange(Number(e.target.value))}
-        className="range-slider"
-        style={{ background: bg, width: '100%' }}
+        className="range-slider w-full"
+        style={{ background: bg }}
       />
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 7 }}>
+      <div className="flex justify-between mt-[7px]">
         {MARKS.map((m, i) => (
-          <span key={i} style={{ fontSize: 9.5, color: C.slate300, fontWeight: 400 }}>{m}</span>
+          <span key={i} className="text-[9.5px] text-slate-300 font-normal">{m}</span>
         ))}
       </div>
     </div>
   );
 }
 
-
+/* ══════════════════════════════════════════════════════════════
+   RISK SELECTOR
+══════════════════════════════════════════════════════════════ */
 function RiskSelector({ field }) {
   const { value, onChange } = field;
   const active = RISK_OPTIONS.find(o => o.value === value);
 
   return (
     <div>
-      <p style={{ fontSize: 10.5, fontWeight: 700, color: C.slate400, letterSpacing: '0.1em', marginBottom: 10 }}>
+      <p className="text-[10.5px] font-bold text-slate-400 tracking-[0.1em] mb-2.5">
         RISK TOLERANCE
       </p>
 
-      <div style={{ display: 'flex', gap: 8 }}>
+      <div className="flex gap-2">
         {RISK_OPTIONS.map(opt => {
           const on = value === opt.value;
           return (
@@ -252,56 +238,24 @@ function RiskSelector({ field }) {
               key={opt.value}
               type="button"
               onClick={() => onChange(opt.value)}
-              style={{
-                flex: 1,
-                padding: '9px 0',
-                borderRadius: 9,
-                border: `1.5px solid ${on ? C.navy : C.slate200}`,
-                background: on ? C.navy : C.white,
-                color: on ? C.white : C.slate600,
-                fontSize: 13,
-                fontWeight: on ? 700 : 500,
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-                boxShadow: on ? '0 2px 10px rgba(13,31,61,0.18)' : 'none',
-                transform: on ? 'translateY(-1px)' : 'none',
-                position: 'relative',
-              }}
+              className={`flex-1 py-[9px] rounded-[9px] text-[13px] cursor-pointer transition-all duration-150 relative
+                border-[1.5px] ${on
+                  ? 'bg-[#0d1f3d] border-[#0d1f3d] text-white font-bold shadow-[0_2px_10px_rgba(13,31,61,0.18)] -translate-y-px'
+                  : 'bg-white border-slate-200 text-slate-600 font-medium'
+                }`}
             >
               {opt.label}
-              {/* Active indicator dot below the label */}
               {on && (
-                <span style={{
-                  position: 'absolute', bottom: -1, left: '50%',
-                  transform: 'translateX(-50%)',
-                  width: 4, height: 4, borderRadius: '50%',
-                  background: 'rgba(255,255,255,0.6)',
-                }}/>
+                <span className="absolute bottom-[-1px] left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-white/60" />
               )}
             </button>
           );
         })}
       </div>
 
-      {/* Description — neutral, no colored background */}
       {active && (
-        <div style={{
-          marginTop: 8,
-          display: 'flex', alignItems: 'center', gap: 8,
-          padding: '9px 12px',
-          borderRadius: 8,
-          background: C.slate50,
-          border: `1px solid ${C.slate200}`,
-          fontSize: 12,
-          fontWeight: 500,
-          color: C.slate600,
-        }}>
-          <span style={{
-            fontSize: 10, fontWeight: 700, letterSpacing: '0.05em',
-            color: C.white, background: C.navy,
-            padding: '2px 7px', borderRadius: 4,
-            flexShrink: 0,
-          }}>
+        <div className="mt-2 flex items-center gap-2 px-3 py-[9px] rounded-lg bg-slate-50 border border-slate-200 text-[12px] font-medium text-slate-600">
+          <span className="text-[10px] font-bold tracking-[0.05em] text-white bg-[#0d1f3d] px-[7px] py-[2px] rounded shrink-0">
             {active.badge.toUpperCase()}
           </span>
           {active.desc}
@@ -312,17 +266,17 @@ function RiskSelector({ field }) {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   GOAL LIST — clean navy active state
+   GOAL LIST
 ══════════════════════════════════════════════════════════════ */
 function GoalList({ field }) {
   const { value, onChange } = field;
 
   return (
     <div>
-      <p style={{ fontSize: 10.5, fontWeight: 700, color: C.slate400, letterSpacing: '0.1em', marginBottom: 10 }}>
+      <p className="text-[10.5px] font-bold text-slate-400 tracking-[0.1em] mb-2.5">
         FINANCIAL GOAL
       </p>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+      <div className="flex flex-col gap-[5px]">
         {GOAL_OPTIONS.map(opt => {
           const on = value === opt.value;
           return (
@@ -330,44 +284,23 @@ function GoalList({ field }) {
               key={opt.value}
               type="button"
               onClick={() => onChange(opt.value)}
-              style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '8px 11px',
-                borderRadius: 9,
-                border: `1.5px solid ${on ? C.navy : C.slate200}`,
-                background: on ? C.navy : C.white,
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-                boxShadow: on ? '0 2px 10px rgba(13,31,61,0.14)' : 'none',
-                width: '100%',
-                textAlign: 'left',
-              }}
+              className={`flex items-center justify-between px-[11px] py-2 rounded-[9px] cursor-pointer transition-all duration-150 w-full text-left
+                border-[1.5px] ${on
+                  ? 'bg-[#0d1f3d] border-[#0d1f3d] shadow-[0_2px_10px_rgba(13,31,61,0.14)]'
+                  : 'bg-white border-slate-200'
+                }`}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                {/* Monochrome icon placeholder instead of emoji when active */}
-                <span style={{
-                  width: 28, height: 28, borderRadius: 7,
-                  background: on ? 'rgba(255,255,255,0.12)' : C.slate100,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 13, flexShrink: 0,
-                }}>
+              <div className="flex items-center gap-2">
+                <span className={`w-7 h-7 rounded-[7px] flex items-center justify-center text-[13px] shrink-0
+                  ${on ? 'bg-white/[0.12]' : 'bg-slate-100'}`}>
                   {opt.icon}
                 </span>
-                <span style={{
-                  fontSize: 12.5,
-                  fontWeight: on ? 600 : 500,
-                  color: on ? C.white : C.slate700,
-                }}>
+                <span className={`text-[12.5px] ${on ? 'font-semibold text-white' : 'font-medium text-slate-700'}`}>
                   {opt.label}
                 </span>
               </div>
-              <span style={{
-                fontSize: 12.5,
-                fontWeight: 700,
-                color: on ? 'rgba(255,255,255,0.8)' : C.slate400,
-                fontVariantNumeric: 'tabular-nums',
-                letterSpacing: '-0.01em',
-              }}>
+              <span className={`text-[12.5px] font-bold tabular-nums tracking-[-0.01em]
+                ${on ? 'text-white/80' : 'text-slate-400'}`}>
                 ₹{fmt(opt.amt)}
               </span>
             </button>
@@ -405,126 +338,97 @@ export default function InvestmentForm({ values: ext, onChange, onCalculate }) {
     <form
       onSubmit={handleSubmit(() => onCalculate())}
       noValidate
-      style={{
-        background: C.white,
-        borderRadius: 16,
-        border: `1px solid ${C.slate200}`,
-        boxShadow: '0 1px 8px rgba(0,0,0,0.05), 0 4px 20px rgba(0,0,0,0.04)',
-        overflow: 'hidden',
-      }}
+      className="bg-white rounded-2xl border border-slate-200 shadow-[0_1px_8px_rgba(0,0,0,0.05),0_4px_20px_rgba(0,0,0,0.04)] overflow-hidden"
     >
       {/* ── Header ── */}
-      <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '15px 22px',
-        borderBottom: `1px solid ${C.slate100}`,
-        background: C.white,
-      }}>
-        <span style={{ fontSize: 13.5, fontWeight: 700, color: C.navy }}>
+      <div className="flex items-center justify-between px-[22px] py-[15px] border-b border-slate-100 bg-white">
+        <span className="text-[13.5px] font-bold text-[#0d1f3d]">
           Investment Profile Input
         </span>
-        {/* Progress indicator — slate only */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 10, fontWeight: 600, color: C.slate300, letterSpacing: '0.04em' }}>⏱ 6-9D</span>
-          <div style={{ display: 'flex', gap: 3 }}>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-semibold text-slate-300 tracking-[0.04em]">⏱ 6-9D</span>
+          <div className="flex gap-[3px]">
             {[1, 1, 1, 0, 0].map((on, i) => (
-              <div key={i} style={{
-                width: 18, height: 4, borderRadius: 3,
-                background: on ? C.navy : C.slate200,
-                opacity: on ? (i === 0 ? 1 : i === 1 ? 0.65 : 0.35) : 1,
-              }} />
+              <div
+                key={i}
+                className="w-[18px] h-1 rounded-[3px]"
+                style={{
+                  background: on ? C.navy : C.slate200,
+                  opacity: on ? (i === 0 ? 1 : i === 1 ? 0.65 : 0.35) : 1,
+                }}
+              />
             ))}
           </div>
         </div>
       </div>
 
       {/* ── Body ── */}
-      <div style={{ padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 18 }}>
+      <div className="px-[22px] py-5 flex flex-col gap-[18px]">
 
         {/* Row 1: Income / Investment */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
-          <Controller name="income" control={control}
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-3">
+          <Controller
+            name="income"
+            control={control}
             rules={{ required: 'Required', min: { value: 1, message: 'Must be > 0' } }}
             render={({ field }) => <MoneyInput id="income" label="Monthly Income" field={field} error={errors.income} />}
           />
-          <Controller name="investment" control={control}
+          <Controller
+            name="investment"
+            control={control}
             rules={{ required: 'Required', min: { value: 100, message: 'Min ₹100' } }}
             render={({ field }) => <MoneyInput id="investment" label="Monthly Investment Amount" field={field} error={errors.investment} />}
           />
         </div>
 
         {/* Row 2: Duration */}
-        <div style={{
-          padding: '13px 15px',
-          borderRadius: 10,
-          border: `1.5px solid ${C.slate200}`,
-          background: C.slate50,
-        }}>
-          <Controller name="duration" control={control}
+        <div className="px-[15px] py-[13px] rounded-[10px] border-[1.5px] border-slate-200 bg-slate-50">
+          <Controller
+            name="duration"
+            control={control}
             render={({ field }) => <DurationSlider field={field} />}
           />
         </div>
 
         {/* Row 3: Risk */}
-        <Controller name="risk" control={control}
+        <Controller
+          name="risk"
+          control={control}
           render={({ field }) => <RiskSelector field={field} />}
         />
 
         {/* Row 4: Goals + Chart */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 12 }}>
-
-          <Controller name="goal" control={control}
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-3">
+          <Controller
+            name="goal"
+            control={control}
             render={({ field }) => <GoalList field={field} />}
           />
 
           {/* Growth chart — dark card */}
-          <div style={{
-            background: C.navy,
-            borderRadius: 12,
-            padding: '12px 13px',
-            display: 'flex',
-            flexDirection: 'column',
-            minHeight: 240,
-          }}>
+          <div className="bg-[#0d1f3d] rounded-xl p-[12px_13px] flex flex-col min-h-[240px]">
             {/* Chart header */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <span style={{ fontSize: 11.5, fontWeight: 700, color: 'rgba(255,255,255,0.82)', letterSpacing: '0.01em' }}>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[11.5px] font-bold text-white/[0.82] tracking-[0.01em]">
                 Growth Projection
               </span>
-              <span style={{
-                fontSize: 9.5, fontWeight: 600,
-                color: 'rgba(255,255,255,0.4)',
-                background: 'rgba(255,255,255,0.08)',
-                padding: '2px 7px', borderRadius: 5,
-              }}>
+              <span className="text-[9.5px] font-semibold text-white/40 bg-white/[0.08] px-[7px] py-[2px] rounded-[5px]">
                 {dur} yr ▾
               </span>
             </div>
 
             {/* Canvas */}
-            <div style={{ flex: 1, minHeight: 0 }}>
+            <div className="flex-1 min-h-0">
               <GrowthChart duration={dur} risk={risk} />
             </div>
 
             {/* Footer */}
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: 6,
-              marginTop: 8, paddingTop: 8,
-              borderTop: '1px solid rgba(255,255,255,0.07)',
-            }}>
-              <div style={{
-                width: 6, height: 6, borderRadius: '50%',
-                background: 'rgba(255,255,255,0.5)', flexShrink: 0,
-              }} />
-              <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.38)', letterSpacing: '0.02em' }}>
+            <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-white/[0.07]">
+              <div className="w-1.5 h-1.5 rounded-full bg-white/50 shrink-0" />
+              <span className="text-[10px] text-white/[0.38] tracking-[0.02em]">
                 Expected annual return
               </span>
-              <span style={{
-                fontSize: 11.5, fontWeight: 800,
-                color: 'rgba(255,255,255,0.78)',
-                marginLeft: 'auto',
-                letterSpacing: '-0.01em',
-              }}>
+              <span className="text-[11.5px] font-extrabold text-white/[0.78] ml-auto tracking-[-0.01em]">
                 {RETURN_RANGE[risk]}
               </span>
             </div>
@@ -532,36 +436,16 @@ export default function InvestmentForm({ values: ext, onChange, onCalculate }) {
         </div>
 
         {/* Divider */}
-        <div style={{ height: 1, background: C.slate100, marginTop: 2 }} />
+        <div className="h-px bg-slate-100 mt-0.5" />
 
-        {/* Submit — solid navy, no green */}
+        {/* Submit */}
         <button
           id="btn-analyze-portfolio"
           type="submit"
-          style={{
-            width: '100%',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-            padding: '13px 24px',
-            borderRadius: 10,
-            background: C.navy,
-            color: C.white,
-            fontSize: 13.5,
-            fontWeight: 700,
-            letterSpacing: '0.025em',
-            border: 'none',
-            cursor: 'pointer',
-            transition: 'all 0.15s ease',
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.background = C.navyLight;
-            e.currentTarget.style.transform  = 'translateY(-1px)';
-            e.currentTarget.style.boxShadow  = '0 6px 20px rgba(13,31,61,0.28)';
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.background = C.navy;
-            e.currentTarget.style.transform  = 'none';
-            e.currentTarget.style.boxShadow  = 'none';
-          }}
+          className="w-full flex items-center justify-center gap-2 px-6 py-[13px] rounded-[10px]
+            bg-[#0d1f3d] text-white text-[13.5px] font-bold tracking-[0.025em] border-none cursor-pointer
+            transition-all duration-150 hover:bg-[#1a3560] hover:-translate-y-px
+            hover:shadow-[0_6px_20px_rgba(13,31,61,0.28)]"
         >
           <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
             <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
